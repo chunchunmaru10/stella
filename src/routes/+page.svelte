@@ -1,13 +1,7 @@
 <script lang="ts">
-	import { read } from '$app/server';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	onMount(() => {
-		// const res = await fetch('/', {
-		// 	method: 'POST',
-		// 	body: 'Hello'
-		// });
-		// console.log(await res.json());
 		document.addEventListener('paste', onPaste);
 
 		return () => {

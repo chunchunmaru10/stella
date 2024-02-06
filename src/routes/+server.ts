@@ -1,4 +1,4 @@
-import { getMainStatFromRawString } from '$lib';
+import { getStatsFromRawString } from '$lib';
 import {
 	sets,
 	type Set,
@@ -73,15 +73,10 @@ export const POST = async ({ request }) => {
 				break;
 		}
 
-		const mainStat = getMainStatFromRawString(rawString, [...setMainStat]);
+		const stats = getStatsFromRawString(rawString, [...setMainStat]);
 
 		if (!matchedType)
 			return new Response('Error scanning piece type', {
-				status: 400
-			});
-
-		if (!mainStat)
-			return new Response('Main stat not found', {
 				status: 400
 			});
 
@@ -90,11 +85,12 @@ export const POST = async ({ request }) => {
 				rawString,
 				setName: matchedSet.setName,
 				type: matchedType,
-				mainStat
+				...stats
 			})
 		);
 	} catch (e: unknown) {
 		let message = '';
+
 		if (e instanceof Error) message = e.message;
 		else message = 'Something went wrong. Please try again later';
 

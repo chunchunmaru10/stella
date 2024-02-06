@@ -1,6 +1,8 @@
-// place files you want to import through the `$lib` alias in this folder.
-export function getMainStatFromRawString(rawString: string, mainStats: string[]) {
+import { subStats as subStatList } from './types';
+
+export function getStatsFromRawString(rawString: string, mainStats: string[]) {
 	let mainStat = '';
+	const subStats = [];
 	const lines = rawString.split('\n');
 
 	let mainStatLineIndex = -1;
@@ -21,5 +23,18 @@ export function getMainStatFromRawString(rawString: string, mainStats: string[])
 	if (['HP', 'ATK', 'DEF'].includes(mainStat) && lines[mainStatLineIndex].endsWith('%'))
 		mainStat += '%';
 
-	return mainStat;
+	for (let i = mainStatLineIndex + 1; i < mainStatLineIndex + 5; i++) {
+		for (const stat of subStatList) {
+			if (lines[i].includes(stat)) {
+				let subStat = stat;
+				if (['HP', 'ATK', 'DEF'].includes(subStat) && lines[i].endsWith('%')) subStat += '%';
+				subStats.push(subStat);
+			}
+		}
+	}
+
+	return {
+		mainStat,
+		subStats
+	};
 }
