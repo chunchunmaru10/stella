@@ -10,6 +10,8 @@
 	});
 
 	let imagePreview = '';
+	let loading = false;
+	let data = '';
 
 	async function onPaste(e: ClipboardEvent) {
 		const items = e.clipboardData?.items;
@@ -24,8 +26,12 @@
 
 		reader.onload = async function (e) {
 			if (!e.target?.result) return;
+
 			const imageData = e.target.result;
 			imagePreview = imageData.toString();
+
+			loading = true;
+
 			const response = await fetch('/', {
 				method: 'POST',
 				headers: {
@@ -36,11 +42,13 @@
 
 			if (response.ok) {
 				const result = await response.json();
-				console.log(result);
+				data = JSON.stringify(result);
 			} else {
 				const result = await response.text();
 				alert(result);
 			}
+
+			loading = false;
 		};
 
 		reader.readAsDataURL(blob);
@@ -48,7 +56,14 @@
 </script>
 
 <h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<p>
+	Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
+</p>
 {#if imagePreview}
 	<img src={imagePreview} alt="preview" />
+{/if}
+{#if loading}
+	<p>Loading</p>
+{:else}
+	<p>{data}</p>
 {/if}

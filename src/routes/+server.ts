@@ -1,20 +1,25 @@
 import { getStatsFromRawString } from '$lib';
-import {
-	sets,
-	type Set,
-	pieceType,
-	headMainStat,
-	handsMainStat,
-	bodyMainStat,
-	feetMainStat,
-	planarSphereMainStat,
-	linkRopeMainStat
-} from '$lib/types';
+import type { Stat, RelicSet } from '$lib/types';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
+import contentful from '$lib/contentful';
+import type { Entry } from 'contentful';
 
 export const POST = async ({ request }) => {
 	try {
+		const relicSets = (
+			await contentful.withoutUnresolvableLinks.getEntries<RelicSet>({
+				content_type: 'relicSets',
+				include: 3
+			})
+		).items;
+		const subStats = (
+			await contentful.getEntries<Stat>({
+				content_type: 'stats',
+				'fields.canBeSubstat': true
+			})
+		).items.map((stat) => stat.fields.name);
+
 		const dataUrl: string = await request.json();
 		const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
 		const processedBuffer = await sharp(buffer)
@@ -29,14 +34,17 @@ export const POST = async ({ request }) => {
 
 		let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+']/g, '');
 
-		let matchedSet: Set | undefined;
-		let matchedType: (typeof pieceType)[number] | undefined;
-		for (const set of sets) {
-			const setIndex = rawString.indexOf(set.setName);
+		let matchedSet: Entry<RelicSet, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;
+		let matchedType: string | undefined;
+		let stats: ReturnType<typeof getStatsFromRawString> | undefined;
+
+		for (const set of relicSets) {
+			const setIndex = rawString.indexOf(set.fields.name);
 			if (setIndex !== -1) {
 				matchedSet = set;
+
 				// remove string after set name (which is usually the set abilities and descriptions)
-				rawString = rawString.slice(0, setIndex + set.setName.length);
+				rawString = rawString.slice(0, setIndex + set.fields.name.length);
 			}
 		}
 
@@ -45,45 +53,34 @@ export const POST = async ({ request }) => {
 				status: 400
 			});
 
-		let setMainStat: string[] = [];
-		switch (true) {
-			case matchedSet.head && rawString.includes(matchedSet.head):
-				matchedType = 'Head';
-				setMainStat = [...headMainStat];
-				break;
-			case matchedSet.hands && rawString.includes(matchedSet.hands):
-				matchedType = 'Hands';
-				setMainStat = [...handsMainStat];
-				break;
-			case matchedSet.body && rawString.includes(matchedSet.body):
-				matchedType = 'Body';
-				setMainStat = [...bodyMainStat];
-				break;
-			case matchedSet.feet && rawString.includes(matchedSet.feet):
-				matchedType = 'Feet';
-				setMainStat = [...feetMainStat];
-				break;
-			case matchedSet.planarSphere && rawString.includes(matchedSet.planarSphere):
-				matchedType = 'Planar Sphere';
-				setMainStat = [...planarSphereMainStat];
-				break;
-			case matchedSet.linkRope && rawString.includes(matchedSet.linkRope):
-				matchedType = 'Link Rope';
-				setMainStat = [...linkRopeMainStat];
-				break;
+		for (const piece of matchedSet.fields.pieces) {
+			if (piece && rawString.includes(piece.fields.name) && piece.fields.type?.fields.type) {
+				matchedType = piece.fields.type.fields.type;
+				stats = getStatsFromRawString(
+					rawString,
+					piece.fields.type.fields.mainStats.map((stat) => {
+						if (stat?.fields.name) return stat.fields.name;
+						else throw new Error('Stat from matched set is empty');
+					}),
+					subStats
+				);
+			}
 		}
 
-		const stats = getStatsFromRawString(rawString, [...setMainStat]);
-
 		if (!matchedType)
-			return new Response('Error scanning piece type', {
+			return new Response('No matched type found', {
+				status: 400
+			});
+
+		if (!stats)
+			return new Response('No stats found', {
 				status: 400
 			});
 
 		return new Response(
 			JSON.stringify({
 				rawString,
-				setName: matchedSet.setName,
+				setName: matchedSet.fields.name,
 				type: matchedType,
 				...stats
 			})

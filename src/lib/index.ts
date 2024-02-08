@@ -1,6 +1,8 @@
-import { subStats as subStatList } from './types';
-
-export function getStatsFromRawString(rawString: string, mainStats: string[]) {
+export function getStatsFromRawString(
+	rawString: string,
+	mainStatList: string[],
+	subStatList: string[]
+) {
 	let mainStat = '';
 	const subStats = [];
 	const lines = rawString.split('\n');
@@ -8,11 +10,21 @@ export function getStatsFromRawString(rawString: string, mainStats: string[]) {
 	let mainStatLineIndex = -1;
 
 	for (const [index, line] of lines.entries()) {
-		for (const stat of mainStats) {
-			if (line.includes(stat)) {
-				mainStatLineIndex = index;
-				mainStat = stat;
-				break;
+		for (const stat of mainStatList) {
+			// if the stat includes %, such as HP%, ATK%, and DEF%, check if the line has both the stat (HP) and the percentage
+			// other percentage stats (such as CRITs) is not included in this statment because they dont have the non-% variant
+			if (stat.includes('%')) {
+				if (line.includes(stat.replaceAll('%', '')) && line.includes('%')) {
+					mainStatLineIndex = index;
+					mainStat = stat;
+					break;
+				}
+			} else {
+				if (line.includes(stat)) {
+					mainStatLineIndex = index;
+					mainStat = stat;
+					break;
+				}
 			}
 		}
 		if (mainStatLineIndex !== -1) break;
