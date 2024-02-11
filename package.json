@@ -12,6 +12,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@iconify/svelte": "^3.1.6",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
@@ -40,6 +41,8 @@
 	"dependencies": {
 		"contentful": "^10.6.21",
 		"sharp": "^0.33.2",
+		"svelte-headlessui": "^0.0.33",
+		"svelte-transition": "^0.0.10",
 		"tesseract.js": "^5.0.4"
 	}
 }
