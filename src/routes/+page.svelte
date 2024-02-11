@@ -14,6 +14,7 @@
 	let data = '';
 
 	async function onPaste(e: ClipboardEvent) {
+		data = '';
 		const items = e.clipboardData?.items;
 
 		if (!items || items.length === 0 || items[0].type.indexOf('image') === -1) return;
