@@ -11,7 +11,7 @@
 
 	let imagePreview = '';
 	let loading = false;
-	let data = '';
+	let data = 'Data';
 
 	async function onPaste(e: ClipboardEvent) {
 		data = '';
@@ -56,15 +56,20 @@
 	}
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>
-	Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
-</p>
-{#if imagePreview}
-	<img src={imagePreview} alt="preview" />
-{/if}
-{#if loading}
-	<p>Loading</p>
-{:else}
-	<p>{data}</p>
-{/if}
+<div class="grid gap-4 px-8 md:grid-cols-2 xl:h-full xl:grid-cols-3">
+	<div class="bg-red-500 xl:h-full">
+		{#if imagePreview}
+			<img src={imagePreview} alt="preview" />
+		{:else}
+			<div>Paste image here</div>
+		{/if}
+	</div>
+	<div class="bg-blue-500">
+		{#if loading}
+			<p>Loading</p>
+		{:else}
+			<p>{data}</p>
+		{/if}
+	</div>
+	<div class="mb-8 bg-green-500 md:col-span-2 xl:col-span-1 xl:mb-0">Characters</div>
+</div>

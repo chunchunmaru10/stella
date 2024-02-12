@@ -4,6 +4,6 @@
 </script>
 
 <Nav />
-<main>
+<main class="h-[calc(100svh-7rem-2rem)]">
 	<slot />
 </main>
