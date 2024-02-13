@@ -129,11 +129,13 @@ export const POST = async ({ request }) => {
 
 			let subStatsIncluded = 0;
 			let maxPotentialValue = 0; // accumulated max potential value
-			let actualValue = 0; // actual value/rating of the relic for this character
+			const actualValues: { stat: string; value: number }[] = []; // actual value/rating of the relic for this character
 			// if the relic only has 3 substats, the unknown 4th substat will be the optimistic potential value
 			// using character A from above as an example, if the relic only has CRIT DMG, ATK%, and HP%, the actual value is 7,
 			// but the potential value is 4, because the max possible value it hasn't gotten yet is 4 (CRIT Rate)
-			let potentialValue = 0;
+			// all potentially good stats are added to the array, the frontend will display the stats which when added to the actual
+			// value will exceed the threshold value set by the user.
+			let potentialValues: { stat: string; value: number }[] = [];
 
 			const subStatValues: { substat: string; value: number }[] = [];
 			character.fields.bestSubstats.forEach((stat) => {
@@ -178,7 +180,10 @@ export const POST = async ({ request }) => {
 			// calculate for actual value
 			for (const subStatValue of subStatValues) {
 				if (stats.subStats.includes(subStatValue.substat)) {
-					actualValue += subStatValue.value;
+					actualValues.push({
+						stat: subStatValue.substat,
+						value: subStatValue.value
+					});
 				}
 			}
 
@@ -189,21 +194,27 @@ export const POST = async ({ request }) => {
 				// we just need to filter out the ones that are already included in the relic substats
 				// main stat is also excluded since if the stat is main stat, it cant be a potential substat
 				// optional chaining is used for accessing elements at index 0 because a character may only have 2 best stats
-				// and the relic contains both of them, in this case, the filtered out array will be empty
-				potentialValue +=
-					subStatValues.filter(
+				// and if the relic contains both of them, in this case, the filtered out array will be empty
+				potentialValues = subStatValues
+					.filter(
 						(subStatValue) =>
 							!relicStats.subStats.includes(subStatValue.substat) &&
 							relicStats.mainStat !== subStatValue.substat
-					)?.[0].value ?? 0;
+					)
+					.map((stat) => {
+						return {
+							stat: stat.substat,
+							value: stat.value
+						};
+					});
 			}
 
 			matchedCharacters.push({
 				name: character.fields.name,
 				thumbnail: character.fields.thumbnail?.fields.file?.url ?? '',
 				maxPotentialValue,
-				actualValue,
-				potentialValue
+				actualValues,
+				potentialValues
 			});
 		}
 
