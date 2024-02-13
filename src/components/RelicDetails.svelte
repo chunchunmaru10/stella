@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Relic } from '$lib/types';
-	import { Button, Card } from 'flowbite-svelte';
+	import { Button, Card, Spinner } from 'flowbite-svelte';
 	import Modal from './common/Modal.svelte';
 	import Icon from '@iconify/svelte';
 
@@ -10,14 +10,20 @@
 
 {#if loading}
 	<Card class="flex max-w-full items-center justify-center text-gray-400">
-		<p>Loading</p>
+		<p class="inline-flex items-center gap-4 truncate">
+			<Spinner class="h-6 w-6" />
+			<span>Analyzing image data...</span>
+		</p>
 	</Card>
 {:else if !data}
 	<Card class="flex max-w-full items-center justify-center text-gray-400">
-		<p class="">No relic detected</p>
+		<p class="inline-flex items-center gap-3">
+			<Icon icon="lucide:search-x" width={24} height={24} />
+			<span>No relics detected</span>
+		</p>
 	</Card>
 {:else}
-	<Card class="my-auto h-fit min-w-0 max-w-full">
+	<Card class="my-auto flex h-full min-w-0 max-w-full flex-col justify-between">
 		<div class="font-[DIN]">
 			<h2 class="w-full min-w-0 truncate text-2xl text-gold-light">
 				{data.relicName}
@@ -49,12 +55,14 @@
 				{data.setName}
 			</h3>
 		</div>
-		<Modal>
-			<Button class="mt-6 xl:hidden" slot="button" let:dialog on:click={dialog.open}>
-				<Icon icon="fa6-solid:chart-bar" class="mr-2" />
-				<span>Details</span>
-			</Button>
-			<div>Hello</div>
-		</Modal>
+		<div>
+			<Modal>
+				<Button class="mt-6 w-full xl:hidden" slot="button" let:dialog on:click={dialog.open}>
+					<Icon icon="fa6-solid:chart-bar" class="mr-2" />
+					<span>Details</span>
+				</Button>
+				<div>Hello</div>
+			</Modal>
+		</div>
 	</Card>
 {/if}
