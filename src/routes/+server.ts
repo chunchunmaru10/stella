@@ -1,5 +1,5 @@
 import { getStatsFromRawString } from '$lib';
-import type { Stat, RelicSet } from '$lib/types';
+import type { Stat, RelicSet, RelicPiece } from '$lib/types';
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
 import contentful from '$lib/contentful';
@@ -35,7 +35,7 @@ export const POST = async ({ request }) => {
 		let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+']/g, '');
 
 		let matchedSet: Entry<RelicSet, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;
-		let matchedType: string | undefined;
+		let matchedPiece: Entry<RelicPiece, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;
 		let stats: ReturnType<typeof getStatsFromRawString> | undefined;
 
 		for (const set of relicSets) {
@@ -55,7 +55,7 @@ export const POST = async ({ request }) => {
 
 		for (const piece of matchedSet.fields.pieces) {
 			if (piece && rawString.includes(piece.fields.name) && piece.fields.type?.fields.type) {
-				matchedType = piece.fields.type.fields.type;
+				matchedPiece = piece;
 				stats = getStatsFromRawString(
 					rawString,
 					piece.fields.type.fields.mainStats.map((stat) => {
@@ -67,7 +67,12 @@ export const POST = async ({ request }) => {
 			}
 		}
 
-		if (!matchedType)
+		if (!matchedPiece)
+			return new Response('No matched piece found', {
+				status: 400
+			});
+
+		if (!matchedPiece.fields.type)
 			return new Response('No matched type found', {
 				status: 400
 			});
@@ -79,9 +84,10 @@ export const POST = async ({ request }) => {
 
 		return new Response(
 			JSON.stringify({
-				rawString,
 				setName: matchedSet.fields.name,
-				type: matchedType,
+				image: matchedPiece.fields.thumbnail?.fields.file?.url ?? '',
+				relicName: matchedPiece.fields.name,
+				type: matchedPiece.fields.type.fields.type,
 				...stats
 			})
 		);

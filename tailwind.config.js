@@ -19,6 +19,11 @@ export default {
 					800: '#5d5758',
 					900: '#504c4d',
 					950: '#292627'
+				},
+				gold: {
+					light: '#c4a373',
+					medium: '#eda13d',
+					dark: '#99665f'
 				}
 			}
 		}

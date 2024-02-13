@@ -34,3 +34,34 @@ export type Stat = {
 		canBeSubstat: contentful.EntryFieldTypes.Boolean;
 	};
 };
+
+export type Character = {
+	contentTypeId: 'characters';
+	fields: {
+		name: contentful.EntryFieldTypes.Text;
+		thumbnail: contentful.EntryFieldTypes.AssetLink;
+		releaseDate: contentful.EntryFieldTypes.Date;
+		bestSets: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<RelicSet>>;
+		bodyStats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
+		feetStats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
+		planarSphereStats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
+		linkRopeStats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
+		bestSubstats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
+		secondBestSubstats: contentful.EntryFieldTypes.Array<
+			contentful.EntryFieldTypes.EntryLink<Stat>
+		>;
+		thirdBestSubstats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
+		fourthBestSubstats: contentful.EntryFieldTypes.Array<
+			contentful.EntryFieldTypes.EntryLink<Stat>
+		>;
+	};
+};
+
+export type Relic = {
+	setName: string;
+	image: string;
+	relicName: string;
+	type: string;
+	mainStat: string;
+	subStats: string[];
+};
