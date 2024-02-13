@@ -127,52 +127,83 @@ export const POST = async ({ request }) => {
 			// if arranged descendingly, it would be CRIT DMG -> CRIT Rate -> ATK% -> SPD -> Break Effect
 			// thus, the max potential value would be 4 + 4 + 3 + 3 = 14 (We are only taking the 4 best values since a relic can only have max 4 substats)
 
-			let subStatsIncluded = 0; // number of substats that has been counted for max value
+			let subStatsIncluded = 0;
 			let maxPotentialValue = 0; // accumulated max potential value
 			let actualValue = 0; // actual value/rating of the relic for this character
+			// if the relic only has 3 substats, the unknown 4th substat will be the optimistic potential value
+			// using character A from above as an example, if the relic only has CRIT DMG, ATK%, and HP%, the actual value is 7,
+			// but the potential value is 4, because the max possible value it hasn't gotten yet is 4 (CRIT Rate)
+			let potentialValue = 0;
 
-			const characterSubstatsValues = [
-				{
-					subStats: character.fields.bestSubstats,
-					value: 4
-				},
-				{
-					subStats: character.fields.secondBestSubstats,
-					value: 3
-				},
-				{
-					subStats: character.fields.thirdBestSubstats,
-					value: 2
-				},
-				{
-					subStats: character.fields.fourthBestSubstats,
-					value: 1
+			const subStatValues: { substat: string; value: number }[] = [];
+			character.fields.bestSubstats.forEach((stat) => {
+				if (stat)
+					subStatValues.push({
+						substat: stat.fields.name,
+						value: 4
+					});
+			});
+			character.fields.secondBestSubstats?.forEach((stat) => {
+				if (stat)
+					subStatValues.push({
+						substat: stat.fields.name,
+						value: 3
+					});
+			});
+			character.fields.thirdBestSubstats?.forEach((stat) => {
+				if (stat)
+					subStatValues.push({
+						substat: stat.fields.name,
+						value: 2
+					});
+			});
+			character.fields.fourthBestSubstats?.forEach((stat) => {
+				if (stat)
+					subStatValues.push({
+						substat: stat.fields.name,
+						value: 1
+					});
+			});
+
+			// calculate for max potential value
+			while (subStatsIncluded < 4) {
+				if (!subStatValues[subStatsIncluded]) break;
+				// if this substat is the same as main stat, do not count this into the max because substats cannot contain the main stat
+				if (subStatValues[subStatsIncluded].substat === stats.mainStat) continue;
+
+				maxPotentialValue += subStatValues[subStatsIncluded].value;
+				subStatsIncluded++;
+			}
+
+			// calculate for actual value
+			for (const subStatValue of subStatValues) {
+				if (stats.subStats.includes(subStatValue.substat)) {
+					actualValue += subStatValue.value;
 				}
-			];
+			}
 
-			for (const subStatsValuePair of characterSubstatsValues) {
-				if (!subStatsValuePair.subStats) continue;
-
-				// calculate for max potential value
-				if (subStatsIncluded < 4) {
-					maxPotentialValue +=
-						Math.min(subStatsValuePair.subStats.length, 4 - subStatsIncluded) *
-						subStatsValuePair.value;
-					subStatsIncluded += subStatsValuePair.subStats.length;
-				}
-				// calculate for actual value
-				const relicSubstats = stats.subStats; // don't know why when stats.subStast is used in the line below stats may be undefined
-				actualValue +=
-					subStatsValuePair.subStats.filter(
-						(stat) => relicSubstats.includes(stat?.fields.name ?? '') ?? false
-					).length * subStatsValuePair.value;
+			// calculate for potential value
+			if (stats.subStats.length < 4) {
+				const relicStats = stats; // must reassign otherwise stats may be undefined in the line below
+				// since the substat values are already arranged in descending order,
+				// we just need to filter out the ones that are already included in the relic substats
+				// main stat is also excluded since if the stat is main stat, it cant be a potential substat
+				// optional chaining is used for accessing elements at index 0 because a character may only have 2 best stats
+				// and the relic contains both of them, in this case, the filtered out array will be empty
+				potentialValue +=
+					subStatValues.filter(
+						(subStatValue) =>
+							!relicStats.subStats.includes(subStatValue.substat) &&
+							relicStats.mainStat !== subStatValue.substat
+					)?.[0].value ?? 0;
 			}
 
 			matchedCharacters.push({
 				name: character.fields.name,
 				thumbnail: character.fields.thumbnail?.fields.file?.url ?? '',
 				maxPotentialValue,
-				actualValue
+				actualValue,
+				potentialValue
 			});
 		}
 

@@ -72,4 +72,5 @@ export type CharacterRelicValue = {
 	thumbnail: string;
 	maxPotentialValue: number;
 	actualValue: number;
+	potentialValue: number;
 };
