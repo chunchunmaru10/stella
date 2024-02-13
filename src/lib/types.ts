@@ -64,4 +64,12 @@ export type Relic = {
 	type: string;
 	mainStat: string;
 	subStats: string[];
+	characters: CharacterRelicValue[];
+};
+
+export type CharacterRelicValue = {
+	name: string;
+	thumbnail: string;
+	maxPotentialValue: number;
+	actualValue: number;
 };
