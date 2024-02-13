@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
+	import { Dropzone } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
@@ -56,20 +58,27 @@
 	}
 </script>
 
-<div class="grid gap-4 px-8 md:grid-cols-2 xl:h-full xl:grid-cols-3">
-	<div class="bg-red-500 xl:h-full">
+<div class="grid w-full gap-4 px-8 md:h-full md:grid-cols-2 xl:grid-cols-3">
+	<div class="md:h-full">
 		{#if imagePreview}
-			<img src={imagePreview} alt="preview" />
+			<img class="mx-auto h-full object-scale-down align-middle" src={imagePreview} alt="preview" />
 		{:else}
-			<div>Paste image here</div>
+			<Dropzone class="md:h-full">
+				<div class="flex h-full w-full flex-col items-center justify-center">
+					<Icon class="mb-2 text-gray-400" icon="fa6-solid:upload" width={32} height={32} />
+					<p class="text-gray-400">Upload or Paste Image Here</p>
+				</div>
+			</Dropzone>
 		{/if}
 	</div>
-	<div class="bg-blue-500">
+	<div class="h-auto max-w-full bg-blue-500">
 		{#if loading}
 			<p>Loading</p>
 		{:else}
-			<p>{data}</p>
+			<p class="max-w-full break-all">
+				{data}
+			</p>
 		{/if}
 	</div>
-	<div class="mb-8 bg-green-500 md:col-span-2 xl:col-span-1 xl:mb-0">Characters</div>
+	<div class="mb-8 hidden bg-green-500 xl:col-span-1 xl:mb-0 xl:block">Characters</div>
 </div>
