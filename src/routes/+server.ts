@@ -7,18 +7,17 @@ import type { Entry } from 'contentful';
 
 export const POST = async ({ request }) => {
 	try {
-		const relicSets = (
-			await contentful.withoutUnresolvableLinks.getEntries<RelicSet>({
+		const [{ items: relicSets }, subStatsRaw] = await Promise.all([
+			contentful.withoutUnresolvableLinks.getEntries<RelicSet>({
 				content_type: 'relicSets',
 				include: 3
-			})
-		).items;
-		const subStats = (
-			await contentful.getEntries<Stat>({
+			}),
+			contentful.getEntries<Stat>({
 				content_type: 'stats',
 				'fields.canBeSubstat': true
 			})
-		).items.map((stat) => stat.fields.name);
+		]);
+		const subStats = subStatsRaw.items.map((stat) => stat.fields.name);
 
 		const dataUrl: string = await request.json();
 		const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');

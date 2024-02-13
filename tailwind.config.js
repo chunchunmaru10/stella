@@ -1,3 +1,5 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+
 /** @type {import('tailwindcss').Config} */
 export default {
 	content: [
@@ -6,6 +8,9 @@ export default {
 	],
 	theme: {
 		extend: {
+			fontFamily: {
+				sans: [...defaultTheme.fontFamily.sans, 'DIN']
+			},
 			colors: {
 				primary: {
 					50: '#f8f8f8',
