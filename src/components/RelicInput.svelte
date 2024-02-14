@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { toast } from '$lib/stores/toast';
 	import type { Relic } from '$lib/types';
 	import Icon from '@iconify/svelte';
 	import { Dropzone } from 'flowbite-svelte';
@@ -48,7 +49,8 @@
 				console.log(data);
 			} else {
 				const result = await response.text();
-				alert(result);
+				toast.error(result);
+				data = undefined;
 			}
 
 			loading = false;
@@ -66,7 +68,7 @@
 			alt="preview"
 		/>
 	{:else}
-		<Dropzone class="md:h-full">
+		<Dropzone class={`md:h-full`}>
 			<div class="flex h-full w-full flex-col items-center justify-center">
 				<Icon class="mb-2 text-gray-400" icon="fa6-solid:upload" width={32} height={32} />
 				<p class="text-gray-400">Upload or Paste Image Here</p>

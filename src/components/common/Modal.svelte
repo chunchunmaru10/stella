@@ -2,7 +2,7 @@
 	import { createDialog } from 'svelte-headlessui';
 	import Transition from 'svelte-transition';
 
-	const dialog = createDialog();
+	export const dialog = createDialog();
 </script>
 
 <slot name="button" {dialog} />
