@@ -91,7 +91,7 @@ export const POST = async ({ request }) => {
 			if (
 				!character.fields.bestSets.map((set) => set?.fields.name).includes(matchedSet.fields.name)
 			)
-				break;
+				continue;
 
 			// if character's matched set's type does not have the correct main stats
 			const matchedType = matchedPiece.fields.type.fields.type;
@@ -99,26 +99,26 @@ export const POST = async ({ request }) => {
 				matchedType === 'Body' &&
 				!character.fields.bodyStats.map((stat) => stat?.fields.name).includes(stats.mainStat)
 			)
-				break;
+				continue;
 			else if (
 				matchedType === 'Feet' &&
 				!character.fields.feetStats.map((stat) => stat?.fields.name).includes(stats.mainStat)
 			)
-				break;
+				continue;
 			else if (
 				matchedType === 'Planar Sphere' &&
 				!character.fields.planarSphereStats
 					.map((stat) => stat?.fields.name)
 					.includes(stats.mainStat)
 			)
-				break;
+				continue;
 			else if (
 				matchedType === 'Link Rope' &&
 				!character.fields.planarSphereStats
 					.map((stat) => stat?.fields.name)
 					.includes(stats.mainStat)
 			)
-				break;
+				continue;
 
 			// calculate substats rating in fraction, the numerator is the value, and the denominator is the max potential value
 			// max potential value is calculated by adding up the number of points for 4 best substats arranged descendingly
