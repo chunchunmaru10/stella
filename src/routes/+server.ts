@@ -122,17 +122,17 @@ export const POST = async ({ request }) => {
 
 			// calculate substats rating in fraction, the numerator is the value, and the denominator is the max potential value
 			// max potential value is calculated by adding up the number of points for 4 best substats arranged descendingly
-			// where best = 4 points, second best = 3 points, and etc... until 1 point
-			// for example, if character A has CRIT DMG (4) and CRIT Rate (4) as best, ATK% (3) and SPD (3) as second best, and Break Effect (2) as third best,
+			// where best = 5 points, second best = 4 points, and etc... until 1 point
+			// for example, if character A has CRIT DMG (5) and CRIT Rate (5) as best, ATK% (4) and SPD (4) as second best, and Break Effect (3) as third best,
 			// if arranged descendingly, it would be CRIT DMG -> CRIT Rate -> ATK% -> SPD -> Break Effect
-			// thus, the max potential value would be 4 + 4 + 3 + 3 = 14 (We are only taking the 4 best values since a relic can only have max 4 substats)
+			// thus, the max potential value would be 5 + 5 + 4 + 4 = 18 (We are only taking the 4 best values since a relic can only have max 4 substats)
 
 			let subStatsIncluded = 0;
 			let maxPotentialValue = 0; // accumulated max potential value
 			const actualValues: { stat: string; value: number }[] = []; // actual value/rating of the relic for this character
 			// if the relic only has 3 substats, the unknown 4th substat will be the optimistic potential value
-			// using character A from above as an example, if the relic only has CRIT DMG, ATK%, and HP%, the actual value is 7,
-			// but the potential value is 4, because the max possible value it hasn't gotten yet is 4 (CRIT Rate)
+			// using character A from above as an example, if the relic only has CRIT DMG, ATK%, and HP%, the actual value is 10,
+			// but the potential value is 5, because the max possible value it hasn't gotten yet is 5 (CRIT Rate)
 			// all potentially good stats are added to the array, the frontend will display the stats which when added to the actual
 			// value will exceed the threshold value set by the user.
 			let potentialValues: { stat: string; value: number }[] = [];
@@ -142,24 +142,31 @@ export const POST = async ({ request }) => {
 				if (stat)
 					subStatValues.push({
 						substat: stat.fields.name,
-						value: 4
+						value: 5
 					});
 			});
 			character.fields.secondBestSubstats?.forEach((stat) => {
 				if (stat)
 					subStatValues.push({
 						substat: stat.fields.name,
-						value: 3
+						value: 4
 					});
 			});
 			character.fields.thirdBestSubstats?.forEach((stat) => {
 				if (stat)
 					subStatValues.push({
 						substat: stat.fields.name,
-						value: 2
+						value: 3
 					});
 			});
 			character.fields.fourthBestSubstats?.forEach((stat) => {
+				if (stat)
+					subStatValues.push({
+						substat: stat.fields.name,
+						value: 2
+					});
+			});
+			character.fields.fifthBestSubstats?.forEach((stat) => {
 				if (stat)
 					subStatValues.push({
 						substat: stat.fields.name,

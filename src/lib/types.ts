@@ -54,6 +54,7 @@ export type Character = {
 		fourthBestSubstats: contentful.EntryFieldTypes.Array<
 			contentful.EntryFieldTypes.EntryLink<Stat>
 		>;
+		fifthBestSubstats: contentful.EntryFieldTypes.Array<contentful.EntryFieldTypes.EntryLink<Stat>>;
 	};
 };
 
