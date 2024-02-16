@@ -8,7 +8,7 @@
 	let data: Relic | undefined;
 </script>
 
-<div class="grid max-h-full w-full gap-4 px-8 md:h-full md:grid-cols-2 xl:grid-cols-3">
+<div class="grid w-full gap-4 px-8 md:h-full md:grid-cols-2 xl:grid-cols-3">
 	<RelicInput bind:loading bind:data />
 	<RelicDetails {loading} {data} />
 	<div class="mb-8 hidden xl:mb-0 xl:block"><CharacterList /></div>

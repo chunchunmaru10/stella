@@ -21,7 +21,9 @@
 	$: if ($mq) dialog?.close();
 </script>
 
-<Card class="my-auto flex h-full min-w-0 max-w-full flex-col justify-between">
+<Card
+	class="scrollbar-thin scrollbar-thumb-primary-500 scrollbar-track-transparent my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto"
+>
 	<div class="font-[DIN]">
 		<h2 class="w-full min-w-0 truncate text-2xl text-gold-light">
 			{data.relicName}
