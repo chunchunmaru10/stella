@@ -22,7 +22,7 @@
 </script>
 
 <Card
-	class="scrollbar-thin scrollbar-thumb-primary-500 scrollbar-track-transparent my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto"
+	class="my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary-500"
 >
 	<div class="font-[DIN]">
 		<h2 class="w-full min-w-0 truncate text-2xl text-gold-light">
@@ -61,7 +61,7 @@
 				<Icon icon="fa6-solid:chart-bar" class="mr-2" />
 				<span>Details</span>
 			</Button>
-			<CharacterList />
+			<CharacterList characters={data.characters} />
 		</Modal>
 	</div>
 </Card>

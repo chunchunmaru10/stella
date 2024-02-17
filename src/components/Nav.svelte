@@ -2,6 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import Modal from './common/Modal.svelte';
 	import { Button, GradientButton } from 'flowbite-svelte';
+	import Settings from './Settings.svelte';
 </script>
 
 <nav class="flex h-28 w-full items-center justify-between p-8">
@@ -23,9 +24,8 @@
 			<Button class="h-10 w-10 p-0" let:dialog slot="button" on:click={dialog.open}>
 				<Icon icon="fa6-solid:gear" width={20} height={20} />
 			</Button>
-			<svelte:fragment let:dialog>
-				<h3>Settings</h3>
-				<Button on:click={dialog.close}>Close</Button>
+			<svelte:fragment>
+				<Settings />
 			</svelte:fragment>
 		</Modal>
 	</div>

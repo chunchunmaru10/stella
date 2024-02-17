@@ -29,6 +29,10 @@ export default {
 					light: '#c4a373',
 					medium: '#eda13d',
 					dark: '#99665f'
+				},
+				purple: {
+					light: '#9c65d7',
+					dark: '#3f4064'
 				}
 			}
 		}

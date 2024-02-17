@@ -219,7 +219,9 @@ export const POST = async ({ request }) => {
 
 			matchedCharacters.push({
 				name: character.fields.name,
-				thumbnail: character.fields.thumbnail?.fields.file?.url ?? '',
+				thumbnail: character.fields.thumbnail?.fields.file?.url + '?fm=webp' ?? '',
+				rarity: character.fields.rarity === 4 ? 4 : 5,
+				releaseDate: new Date(character.fields.releaseDate.toString()),
 				maxPotentialValue,
 				actualValues,
 				potentialValues
@@ -229,7 +231,7 @@ export const POST = async ({ request }) => {
 		return new Response(
 			JSON.stringify({
 				setName: matchedSet.fields.name,
-				image: matchedPiece.fields.thumbnail?.fields.file?.url ?? '',
+				image: matchedPiece.fields.thumbnail?.fields.file?.url + '?fm=webp' ?? '',
 				relicName: matchedPiece.fields.name,
 				type: matchedPiece.fields.type.fields.type,
 				...stats,

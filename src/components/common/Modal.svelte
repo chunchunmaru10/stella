@@ -19,7 +19,7 @@
 					leaveTo="opacity-0 scale-95"
 				>
 					<div
-						class="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-800 p-6 text-left align-middle shadow-xl transition-all"
+						class="max-h-[95vh] w-full max-w-md transform overflow-hidden overflow-y-scroll rounded-2xl bg-gray-800 p-6 text-left align-middle shadow-xl transition-all scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary-500"
 						use:dialog.modal
 					>
 						<slot {dialog} />
