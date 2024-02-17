@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import '../app.css';
 	import Nav from '../components/Nav.svelte';
 	import Toaster from '../components/Toaster.svelte';
@@ -7,8 +6,9 @@
 	import type { CharacterData } from '$lib/types';
 	import { setContext } from 'svelte';
 
-	const characters = readable<CharacterData[]>($page.data.characters);
-	$: setContext('characters', characters);
+	export let data;
+	const characters = readable<Promise<CharacterData[]>>(data.characters);
+	$: setContext('characters', $characters);
 </script>
 
 <svelte:head>
@@ -16,6 +16,6 @@
 </svelte:head>
 <Toaster />
 <Nav />
-<main class="mb-8 md:h-[var(--main-height)]">
+<main class="mb-8 px-8 md:h-[var(--main-height)]">
 	<slot />
 </main>

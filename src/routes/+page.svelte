@@ -10,7 +10,7 @@
 	let relic: Relic | undefined;
 </script>
 
-<div class="grid w-full gap-4 px-8 md:h-[var(--main-height)] md:grid-cols-2 xl:grid-cols-3">
+<div class="grid w-full gap-4 md:h-[var(--main-height)] md:grid-cols-2 xl:grid-cols-3">
 	<RelicInput bind:loading bind:data={relic} />
 	{#if !relic || loading}
 		<Card class="flex max-w-full items-center justify-center text-gray-400 xl:col-span-2">
