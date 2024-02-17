@@ -4,11 +4,10 @@
 	import Icon from '@iconify/svelte';
 	import RelicStats from './RelicStats.svelte';
 
-	export let loading: boolean;
-	export let data: Relic | undefined;
+	export let data: Relic;
 </script>
 
-{#if loading}
+<!-- {#if loading}
 	<Card class="flex max-w-full items-center justify-center text-gray-400">
 		<div class="flex items-center gap-4 truncate p-1">
 			<Spinner class="h-8 w-8" />
@@ -22,6 +21,6 @@
 			<span>No relics detected</span>
 		</p>
 	</Card>
-{:else}
-	<RelicStats {data} />
-{/if}
+{:else} -->
+<RelicStats {data} />
+<!-- {/if} -->

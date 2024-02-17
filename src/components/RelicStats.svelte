@@ -22,7 +22,7 @@
 </script>
 
 <Card
-	class="my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary-500"
+	class="my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto scrollbar-thin"
 >
 	<div class="font-[DIN]">
 		<h2 class="w-full min-w-0 truncate text-2xl text-gold-light">

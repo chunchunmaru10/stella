@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import Modal from './common/Modal.svelte';
-	import { Button, GradientButton } from 'flowbite-svelte';
+	import { Button } from 'flowbite-svelte';
 	import Settings from './Settings.svelte';
 </script>
 

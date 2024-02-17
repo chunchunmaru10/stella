@@ -36,7 +36,7 @@
 
 			loading = true;
 
-			const response = await fetch('/', {
+			const response = await fetch('/api/rateRelic', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -46,7 +46,6 @@
 
 			if (response.ok) {
 				data = await response.json();
-				console.log(data);
 			} else {
 				const result = await response.text();
 				toast.error(result);
