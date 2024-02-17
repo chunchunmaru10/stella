@@ -34,7 +34,7 @@ export const POST = async ({ request }) => {
 		const ret = await worker.recognize(processedBuffer);
 		await worker.terminate();
 
-		let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+']/g, '');
+		let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+:']/g, '');
 
 		let matchedSet: Entry<RelicSet, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;
 		let matchedPiece: Entry<RelicPiece, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;
@@ -175,10 +175,11 @@ export const POST = async ({ request }) => {
 			});
 
 			// calculate for max potential value
-			while (subStatsIncluded < 4) {
-				if (!subStatValues[subStatsIncluded]) break;
+			for (let i = 0; subStatsIncluded < 4; i++) {
+				// when a character only has very little suitable substats, this check is to ensure element exists before accessing the element
+				if (!subStatValues[i]) break;
 				// if this substat is the same as main stat, do not count this into the max because substats cannot contain the main stat
-				if (subStatValues[subStatsIncluded].substat === stats.mainStat) continue;
+				if (subStatValues[i].substat === stats.mainStat) continue;
 
 				maxPotentialValue += subStatValues[subStatsIncluded].value;
 				subStatsIncluded++;
