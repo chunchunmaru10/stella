@@ -1,16 +1,16 @@
 <script lang="ts">
 	import RelicInput from '../components/RelicInput.svelte';
-	import RelicDetails from '../components/RelicDetails.svelte';
 	import type { Relic } from '$lib/types';
 	import CharacterList from '../components/CharacterList.svelte';
 	import { Card, Spinner } from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
+	import RelicStats from '../components/RelicStats.svelte';
 
 	let loading = false;
 	let relic: Relic | undefined;
 </script>
 
-<div class="grid w-full gap-4 px-8 md:h-full md:grid-cols-2 xl:grid-cols-3">
+<div class="grid w-full gap-4 px-8 md:h-[var(--main-height)] md:grid-cols-2 xl:grid-cols-3">
 	<RelicInput bind:loading bind:data={relic} />
 	{#if !relic || loading}
 		<Card class="flex max-w-full items-center justify-center text-gray-400 xl:col-span-2">
@@ -27,8 +27,10 @@
 			{/if}
 		</Card>
 	{:else}
-		<RelicDetails data={relic} />
-		<Card class="mb-8 hidden max-h-full overflow-y-auto scrollbar-thin xl:mb-0 xl:block">
+		<RelicStats data={relic} />
+		<Card
+			class="mb-8 hidden h-full min-w-full overflow-y-auto scrollbar-thin xl:mb-0 xl:block xl:h-[var(--main-height)]"
+		>
 			<CharacterList characters={relic?.characters} />
 		</Card>
 	{/if}

@@ -16,6 +16,6 @@
 </svelte:head>
 <Toaster />
 <Nav />
-<main class="mb-8 md:h-[calc(100svh-7rem-2rem)]">
+<main class="mb-8 md:h-[var(--main-height)]">
 	<slot />
 </main>

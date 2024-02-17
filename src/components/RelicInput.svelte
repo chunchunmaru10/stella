@@ -59,7 +59,7 @@
 	}
 </script>
 
-<div class="flex w-full items-center md:h-[calc(100svh-7rem-2rem)] md:max-h-full">
+<div class="flex w-full items-center md:h-[var(--main-height)] md:max-h-full">
 	{#if imagePreview}
 		<img
 			class="mx-auto w-full align-middle md:max-h-full md:w-auto md:object-scale-down"
