@@ -93,9 +93,9 @@ export type CharacterRelicValue = {
 };
 
 export type Settings = {
-	excludedCharacters?: string[];
-	relicRatings?: 'potential' | 'actual';
-	minRatingPercentage?: number;
-	ratingsFormat?: 'percentage' | 'fraction';
-	includeUnreleaseCharacters?: boolean;
+	excludedCharacters: string[];
+	relicRatings: 'potential' | 'actual';
+	minRatingPercentage: number;
+	ratingsFormat: 'percentage' | 'fraction';
+	includeUnreleaseCharacters: boolean;
 };
