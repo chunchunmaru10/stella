@@ -53,7 +53,7 @@
 	{/each}
 </ul>
 {#key activeTabIndex}
-	<section class="mt-4" in:fly={{ y: 30, duration: 400 }}>
+	<section class="mt-6" in:fly={{ y: 30, duration: 400 }}>
 		{#if tabs[activeTabIndex] === 'Characters'}
 			<CharacterToggleSettings />
 		{:else}
