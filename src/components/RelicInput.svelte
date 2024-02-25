@@ -99,7 +99,8 @@
 
 <div class="flex w-full items-center md:h-[var(--main-height)] md:max-h-full">
 	<button
-		on:click={() => {
+		on:click={(e) => {
+			e.preventDefault();
 			document.getElementById('dropzone')?.click();
 		}}
 		class="h-full w-full"
@@ -112,6 +113,7 @@
 				e.preventDefault();
 			}}
 			on:change={onChange}
+			on:click={(e) => e.stopPropagation()}
 		>
 			{#if imagePreview}
 				<img
