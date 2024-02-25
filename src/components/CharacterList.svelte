@@ -18,10 +18,17 @@
 
 			return {
 				...character,
+				releaseDate: new Date(character.releaseDate),
 				rating
 			};
 		})
-		.filter((c) => (c.rating / c.maxPotentialValue) * 100 >= ($settings.minRatingPercentage ?? 1))
+		.filter((c) => {
+			return (
+				(c.rating / c.maxPotentialValue) * 100 >= $settings.minRatingPercentage &&
+				($settings.includeUnreleaseCharacters || c.releaseDate.getTime() < new Date().getTime()) &&
+				!$settings.excludedCharacters.includes(c.name)
+			);
+		})
 		.sort((a, b) => {
 			const diff = a.rating / a.maxPotentialValue - b.rating / b.maxPotentialValue;
 

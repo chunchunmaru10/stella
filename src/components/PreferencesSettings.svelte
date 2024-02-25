@@ -8,7 +8,7 @@
 	let minRatingPercentage = $settings.minRatingPercentage;
 	let useRatingValue = $settings.relicRatings;
 	let ratingsDisplayedAs = $settings.ratingsFormat;
-	let includeUnreleasedCharacters = 'No';
+	let includeUnreleasedCharacters = $settings.includeUnreleaseCharacters ? 'Yes' : 'No';
 
 	$: {
 		settings.update((prev) => {
