@@ -15,16 +15,54 @@
 
 	let imagePreview = '';
 	export let loading;
-	export let data: Relic | undefined;
+	export let data: Relic | undefined = undefined;
 
 	async function onPaste(e: ClipboardEvent) {
 		const items = e.clipboardData?.items;
 
 		if (!items || items.length === 0 || items[0].type.indexOf('image') === -1) return;
 
-		const blob = items[0].getAsFile();
+		const file = items[0].getAsFile();
 
-		if (!blob) return;
+		await sendImageToServer(file);
+	}
+
+	async function onDrop(e: DragEvent) {
+		e.preventDefault();
+		if (!e.dataTransfer) return;
+		if (e.dataTransfer.items) {
+			if (!e.dataTransfer.items.length) return;
+
+			const item = e.dataTransfer.items[0];
+
+			if (item.kind !== 'file') return;
+
+			const file = item.getAsFile();
+
+			await sendImageToServer(file);
+		} else {
+			if (!e.dataTransfer.files.length) return;
+
+			await sendImageToServer(e.dataTransfer.files[0]);
+		}
+	}
+
+	async function onChange(e: Event) {
+		if (!e.target) return;
+
+		let file = (e.target as HTMLInputElement).files?.[0];
+
+		await sendImageToServer(file ?? null);
+	}
+
+	async function sendImageToServer(file: File | null) {
+		if (!file) return;
+
+		const validFormats = ['image/png', 'image/jpeg', 'image/webp'];
+		if (!validFormats.includes(file.type)) {
+			toast.error('This file type is not supported');
+			return;
+		}
 
 		const reader = new FileReader();
 
@@ -55,23 +93,36 @@
 			loading = false;
 		};
 
-		reader.readAsDataURL(blob);
+		reader.readAsDataURL(file);
 	}
 </script>
 
-<div class="-z-10 flex w-full items-center md:h-[var(--main-height)] md:max-h-full">
-	{#if imagePreview}
-		<img
-			class="mx-auto w-full align-middle md:max-h-full md:w-auto md:object-scale-down"
-			src={imagePreview}
-			alt="preview"
-		/>
-	{:else}
-		<Dropzone class={`md:h-full`}>
-			<div class="flex h-full w-full flex-col items-center justify-center">
+<div class="flex w-full items-center md:h-[var(--main-height)] md:max-h-full">
+	<button
+		on:click={() => {
+			document.getElementById('dropzone')?.click();
+		}}
+		class="h-full w-full"
+	>
+		<Dropzone
+			id="dropzone"
+			class={`min-w-full md:h-full`}
+			on:drop={onDrop}
+			on:dragover={(e) => {
+				e.preventDefault();
+			}}
+			on:change={onChange}
+		>
+			{#if imagePreview}
+				<img
+					class="min-w-full px-3 align-middle md:max-h-full md:w-auto md:object-scale-down"
+					src={imagePreview}
+					alt="preview"
+				/>
+			{:else}
 				<Icon class="mb-2 text-gray-400" icon="fa6-solid:upload" width={32} height={32} />
 				<p class="text-gray-400">Upload or Paste Image Here</p>
-			</div>
+			{/if}
 		</Dropzone>
-	{/if}
+	</button>
 </div>

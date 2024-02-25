@@ -5,6 +5,7 @@
 	import { Card, Spinner } from 'flowbite-svelte';
 	import Icon from '@iconify/svelte';
 	import RelicStats from '../components/RelicStats.svelte';
+	import Error from './+error.svelte';
 
 	let loading = false;
 	let relic: Relic | undefined;
