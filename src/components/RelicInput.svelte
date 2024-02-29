@@ -14,8 +14,12 @@
 	});
 
 	let imagePreview = '';
+	let imageElement: HTMLImageElement;
 	export let loading;
 	export let data: Relic | undefined = undefined;
+
+	// prevent image overflow from input
+	$: imageElement?.parentElement?.classList.add('max-h-[95%]');
 
 	async function onPaste(e: ClipboardEvent) {
 		const items = e.clipboardData?.items;
@@ -120,6 +124,7 @@
 					class="min-w-full px-3 align-middle md:max-h-full md:w-auto md:object-scale-down"
 					src={imagePreview}
 					alt="preview"
+					bind:this={imageElement}
 				/>
 			{:else}
 				<Icon class="mb-2 text-gray-400" icon="fa6-solid:upload" width={32} height={32} />
