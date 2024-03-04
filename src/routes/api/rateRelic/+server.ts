@@ -1,7 +1,5 @@
 import { getStatsFromRawString } from '$lib';
 import type { Stat, RelicSet, RelicPiece, Character, CharacterRelicValue } from '$lib/types';
-import sharp from 'sharp';
-import { createWorker } from 'tesseract.js';
 import contentful from '$lib/contentful';
 import type { Entry } from 'contentful';
 
@@ -21,20 +19,7 @@ export const POST = async ({ request }) => {
 			})
 		]);
 		const subStats = subStatsRaw.items.map((stat) => stat.fields.name);
-
-		const dataUrl: string = await request.json();
-		const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
-		const processedBuffer = await sharp(buffer)
-			.greyscale()
-			.negate({ alpha: false })
-			.linear(1.7, 0)
-			.toBuffer();
-
-		const worker = await createWorker();
-		const ret = await worker.recognize(processedBuffer);
-		await worker.terminate();
-
-		let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+:']/g, '');
+		let rawString = await request.text();
 
 		let matchedSet: Entry<RelicSet, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;
 		let matchedPiece: Entry<RelicPiece, 'WITHOUT_UNRESOLVABLE_LINKS', string> | undefined;

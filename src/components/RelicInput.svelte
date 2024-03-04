@@ -4,6 +4,7 @@
 	import Icon from '@iconify/svelte';
 	import { Dropzone } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
+	import { createWorker } from 'tesseract.js';
 
 	onMount(() => {
 		document.addEventListener('paste', onPaste);
@@ -78,18 +79,37 @@
 
 			loading = true;
 
-			const response = await fetch('/api/rateRelic', {
+			const processImageResponse = await fetch('/api/processImage', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(imageData)
 			});
+			const processImageResult = await processImageResponse.text();
 
-			if (response.ok) {
-				data = await response.json();
+			if (!processImageResponse.ok) {
+				toast.error(processImageResult);
+				data = undefined;
+				loading = false;
+				return;
+			}
+
+			const worker = await createWorker();
+			const ret = await worker.recognize(`data:${file.type};base64,${processImageResult}`);
+			await worker.terminate();
+
+			let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+:']/g, '');
+
+			const rateRelicResponse = await fetch('/api/rateRelic', {
+				method: 'POST',
+				body: rawString
+			});
+
+			if (rateRelicResponse.ok) {
+				data = await rateRelicResponse.json();
 			} else {
-				const result = await response.text();
+				const result = await rateRelicResponse.text();
 				toast.error(result);
 				data = undefined;
 			}
