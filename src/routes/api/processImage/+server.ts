@@ -7,7 +7,7 @@ export const POST = async ({ request }) => {
 		const processedBuffer = await sharp(buffer)
 			.greyscale()
 			.negate({ alpha: false })
-			.linear(1.7, 0)
+			.linear(1.3, 0)
 			.toBuffer();
 
 		return new Response(processedBuffer.toString('base64'));

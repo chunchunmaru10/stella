@@ -99,7 +99,7 @@
 			const ret = await worker.recognize(`data:${file.type};base64,${processImageResult}`);
 			await worker.terminate();
 
-			let rawString = ret.data.text.replaceAll(/[^a-zA-Z0-9\s.%+:']/g, '');
+			let rawString = ret.data.text;
 
 			const rateRelicResponse = await fetch('/api/rateRelic', {
 				method: 'POST',
