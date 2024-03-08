@@ -35,13 +35,16 @@ export function getStatsFromRawString(
 	if (['HP', 'ATK', 'DEF'].includes(mainStat) && lines[mainStatLineIndex].endsWith('%'))
 		mainStat += '%';
 
-	for (let i = mainStatLineIndex + 1; i < mainStatLineIndex + 5; i++) {
+	for (let i = mainStatLineIndex + 1; i < lines.length - mainStatLineIndex; i++) {
 		for (const stat of subStatList) {
 			if (lines[i].includes(stat)) {
 				let subStat = stat;
-				if (['HP', 'ATK', 'DEF'].includes(subStat) && lines[i].endsWith('%')) subStat += '%';
+				if (['HP', 'ATK', 'DEF'].includes(subStat) && lines[i].includes('%')) subStat += '%';
 				subStats.push(subStat);
 			}
+
+			// stop once there are 4 substats detected
+			if (subStats.length >= 4) break;
 		}
 	}
 
