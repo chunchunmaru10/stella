@@ -35,7 +35,7 @@ export function getStatsFromRawString(
 	if (['HP', 'ATK', 'DEF'].includes(mainStat) && lines[mainStatLineIndex].endsWith('%'))
 		mainStat += '%';
 
-	for (let i = mainStatLineIndex + 1; i < lines.length - mainStatLineIndex; i++) {
+	for (let i = mainStatLineIndex + 1; i < lines.length + 1 - mainStatLineIndex; i++) {
 		for (const stat of subStatList) {
 			if (lines[i].includes(stat)) {
 				let subStat = stat;
