@@ -1,4 +1,4 @@
-import { getStatsFromRawString } from '$lib';
+import { getStatsFromRawString, removeSpace } from '$lib';
 import type { Stat, RelicSet, RelicPiece, Character, CharacterRelicValue } from '$lib/types';
 import contentful from '$lib/contentful';
 import type { Entry } from 'contentful';
@@ -26,7 +26,8 @@ export const POST = async ({ request }) => {
 		let stats: ReturnType<typeof getStatsFromRawString> | undefined;
 
 		for (const set of relicSets) {
-			const setIndex = rawString.indexOf(set.fields.name);
+			// temporary remove line breaks because some relic set names may be too long
+			const setIndex = removeSpace(rawString).indexOf(removeSpace(set.fields.name));
 			if (setIndex !== -1) {
 				matchedSet = set;
 
@@ -41,7 +42,12 @@ export const POST = async ({ request }) => {
 			});
 
 		for (const piece of matchedSet.fields.pieces) {
-			if (piece && rawString.includes(piece.fields.name) && piece.fields.type?.fields.type) {
+			// temporary remove line breaks because some relic set names may be too long
+			if (
+				piece &&
+				removeSpace(rawString).includes(removeSpace(piece.fields.name)) &&
+				piece.fields.type?.fields.type
+			) {
 				matchedPiece = piece;
 				stats = getStatsFromRawString(
 					rawString,

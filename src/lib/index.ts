@@ -35,7 +35,7 @@ export function getStatsFromRawString(
 	if (['HP', 'ATK', 'DEF'].includes(mainStat) && lines[mainStatLineIndex].endsWith('%'))
 		mainStat += '%';
 
-	for (let i = mainStatLineIndex + 1; i < lines.length + 1 - mainStatLineIndex; i++) {
+	for (let i = mainStatLineIndex + 1; i < lines.length; i++) {
 		for (const stat of subStatList) {
 			if (lines[i].includes(stat)) {
 				let subStat = stat;
@@ -52,4 +52,8 @@ export function getStatsFromRawString(
 		mainStat,
 		subStats
 	};
+}
+
+export function removeSpace(input: string) {
+	return input.replaceAll(/\s/g, '');
 }
