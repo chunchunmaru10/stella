@@ -27,12 +27,12 @@ export const POST = async ({ request }) => {
 
 		for (const set of relicSets) {
 			// temporary remove line breaks because some relic set names may be too long
-			const setIndex = removeSpace(rawString).indexOf(removeSpace(set.fields.name));
-			if (setIndex !== -1) {
+			if (removeSpace(rawString).includes(removeSpace(set.fields.name))) {
 				matchedSet = set;
 
-				// remove string after set name (which is usually the set abilities and descriptions)
-				rawString = rawString.slice(0, setIndex + set.fields.name.length);
+				// remove text after 2-Pc, which is the set details and description
+				// this is to prevent if there is a set that let's say increases CRIT DMG by 10%, it might include CRIT DMG as one of the substats.
+				rawString = rawString.slice(0, rawString.toLowerCase().indexOf('2-pc'));
 			}
 		}
 
