@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--nav-height: 7rem;
+	--margin-bot: 2rem;
+	--main-height: calc(100svh - 7rem - 2rem);
+}
+
+@layer base {
+	@font-face {
+		font-family: DIN;
+		font-style: normal;
+		font-weight: lighter;
+		src: url(/fonts/DIN/DIN-light.ttf) format('truetype');
+	}
+	@font-face {
+		font-family: DIN;
+		font-style: normal;
+		font-weight: normal;
+		src: url(/fonts/DIN/DIN-normal.ttf) format('truetype');
+	}
+	@font-face {
+		font-family: DIN;
+		font-style: normal;
+		font-weight: bold;
+		src: local('DIN') url(/fonts/DIN/DIN-bold.ttf) format('truetype');
+	}
+	@font-face {
+		font-family: DIN;
+		font-style: normal;
+		font-weight: bolder;
+		src: local('DIN') url(/fonts/DIN/DIN-bolder.ttf) format('truetype');
+	}
+}

@@ -1,0 +1,69 @@
+<script lang="ts">
+	import { Button, Checkbox } from 'flowbite-svelte';
+	import Modal from './common/Modal.svelte';
+	import Icon from '@iconify/svelte';
+
+	export let relicTypes: Map<string, string>;
+	export let selectedRelicTypes: Map<string, string>;
+
+	function selectRelicType([name, image]: [string, string]) {
+		let existing = selectedRelicTypes.get(name);
+
+		if (!existing) selectedRelicTypes.set(name, image);
+		else selectedRelicTypes.delete(name);
+
+		selectedRelicTypes = selectedRelicTypes;
+	}
+</script>
+
+<div class="mt-6 flex items-center gap-4">
+	<h3 class="text-lg font-semibold">Piece Type</h3>
+	<div class="h-[1px] flex-grow rounded-full bg-primary-500 opacity-50" />
+</div>
+<Modal let:dialog>
+	<div slot="button" let:dialog>
+		<Button on:click={() => dialog.open()} class="mt-3 w-full py-2">Select</Button>
+		{#each selectedRelicTypes as [name, image]}
+			<button
+				class="my-2 flex w-full items-center justify-between rounded-md border-2 border-gray-700 p-2 hover:border-gray-500"
+				on:click={() => selectRelicType([name, image])}
+			>
+				<div class="flex items-center gap-2 text-left">
+					<img src={image} alt={name} width="28" height="28" />
+					{name}
+				</div>
+				<Icon icon="mingcute:close-fill" class="text-red-400" />
+			</button>
+		{/each}
+	</div>
+	<div class="max-h-full">
+		<ul class="grid max-h-full grid-cols-1 gap-2 px-2">
+			{#each relicTypes as [name, image]}
+				<li class="w-full">
+					<button
+						class="flex h-full w-full items-center gap-2 rounded-md border-2 border-gray-700 bg-gray-700 p-1 text-left hover:border-gray-600"
+						on:click={() => selectRelicType([name, image])}
+					>
+						<Checkbox disabled checked={!!selectedRelicTypes.get(name)} class="ml-2" />
+						<img src={image} alt={name} width="28" height="28" class="aspect-square h-7 w-7" />
+						<span>
+							{name}
+						</span>
+					</button>
+				</li>
+			{/each}
+		</ul>
+		<div class="mt-4 flex gap-2">
+			<Button
+				class="w-1/2 p-2 dark:bg-red-500 dark:hover:bg-red-500 dark:hover:opacity-90"
+				on:click={() => {
+					selectedRelicTypes.clear();
+					selectedRelicTypes = selectedRelicTypes;
+				}}
+			>
+				Clear All
+			</Button>
+			<Button class="w-1/2 p-2" on:click={() => dialog.close()}>OK</Button>
+		</div>
+	</div>
+</Modal>
