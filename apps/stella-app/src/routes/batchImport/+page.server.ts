@@ -1,13 +1,13 @@
-import { prisma } from '$lib/server/prisma';
+import { db } from 'database';
 import { error } from '@sveltejs/kit';
 
 export async function load() {
 	async function fetchRelicSets() {
-		return await prisma.set.findMany();
+		return await db.set.findMany();
 	}
 
 	async function fetchPieceTypes() {
-		return await prisma.type.findMany({
+		return await db.type.findMany({
 			include: {
 				stats: true
 			}
@@ -15,7 +15,7 @@ export async function load() {
 	}
 
 	async function fetchStats() {
-		return await prisma.stat.findMany();
+		return await db.stat.findMany();
 	}
 
 	try {

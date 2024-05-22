@@ -137,7 +137,7 @@ importers:
         version: 3.2.5
       prettier-plugin-tailwindcss:
         specifier: ^0.5.14
-        version: 0.5.14(prettier@3.2.5)
+        version: 0.5.14(prettier-plugin-svelte@3.2.2)(prettier@3.2.5)
       tailwind-scrollbar:
         specifier: ^3.1.0
         version: 3.1.0(tailwindcss@3.4.3)
@@ -150,12 +150,12 @@ importers:
 
   apps/stella-app:
     dependencies:
-      '@prisma/client':
-        specifier: ^5.13.0
-        version: 5.13.0(prisma@5.13.0)
       '@vercel/analytics':
         specifier: ^1.2.2
         version: 1.2.2
+      database:
+        specifier: workspace:*
+        version: link:../../packages/database
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
@@ -235,9 +235,6 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.5.11
         version: 0.5.11(prettier-plugin-svelte@3.1.2)(prettier@3.2.5)
-      prisma:
-        specifier: ^5.13.0
-        version: 5.13.0
       svelte:
         specifier: ^4.2.7
         version: 4.2.9
@@ -5393,7 +5390,7 @@ packages:
       prettier-plugin-svelte: 3.1.2(prettier@3.2.5)(svelte@4.2.9)
     dev: true
 
-  /prettier-plugin-tailwindcss@0.5.14(prettier@3.2.5):
+  /prettier-plugin-tailwindcss@0.5.14(prettier-plugin-svelte@3.2.2)(prettier@3.2.5):
     resolution: {integrity: sha512-Puaz+wPUAhFp8Lo9HuciYKM2Y2XExESjeT+9NQoVFXZsPPnc9VYss2SpxdQ6vbatmt8/4+SN0oe0I1cPDABg9Q==}
     engines: {node: '>=14.21.3'}
     peerDependencies:
@@ -5446,6 +5443,7 @@ packages:
         optional: true
     dependencies:
       prettier: 3.2.5
+      prettier-plugin-svelte: 3.2.2(prettier@3.2.5)(svelte@4.2.17)
     dev: true
 
   /prettier@3.2.5:

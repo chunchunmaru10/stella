@@ -1,10 +1,10 @@
 import type { CharacterRelicValue, Relic } from '../types';
 import { removeSpace } from '$lib';
-import { prisma } from './prisma';
+import { db } from 'database';
 
 export async function getDbData() {
 	const [sets, subStatList, characters] = await Promise.all([
-		prisma.set.findMany({
+		db.set.findMany({
 			include: {
 				characters: {
 					include: {
@@ -23,12 +23,12 @@ export async function getDbData() {
 				}
 			}
 		}),
-		prisma.stat.findMany({
+		db.stat.findMany({
 			where: {
 				canBeSubstats: true
 			}
 		}),
-		prisma.character.findMany({
+		db.character.findMany({
 			include: {
 				sets: true,
 				characterMainStat: true,

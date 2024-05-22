@@ -2,7 +2,7 @@
 	import { getContext } from 'svelte';
 	import CharacterToggle from './CharacterToggle.svelte';
 	import { settings } from '$lib/stores/settings';
-	import type { Character } from '.prisma/client';
+	import type { Character } from 'database';
 
 	// data stuff
 	const data = getContext<Promise<Character[]>>('characters');

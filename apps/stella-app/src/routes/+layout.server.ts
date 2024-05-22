@@ -1,9 +1,9 @@
-import { prisma } from '$lib/server/prisma';
+import { db } from 'database';
 import { error } from '@sveltejs/kit';
 
 export async function load() {
 	async function fetchCharacters() {
-		return await prisma.character.findMany();
+		return await db.character.findMany();
 	}
 
 	try {
