@@ -1,14 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".svelte-kit/**", ".vercel/**", ".next/**", "!.next/cache/**"]
-    },
-    "lint": {},
     "dev": {
+      "dependsOn": ["^db:generate"],
       "cache": false,
       "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^db:generate", "^build"],
+      "outputs": [".svelte-kit/**", ".vercel/**", ".next/**", "!.next/cache/**"]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:push": {
+      "cache": false
     }
   }
 }

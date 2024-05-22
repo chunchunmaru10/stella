@@ -1,4 +1,4 @@
-import db from "@/server/db";
+import { db } from "database";
 import { firebaseStorage } from "@/server/firebase";
 import {
   deleteObject,
@@ -8,7 +8,7 @@ import {
 } from "firebase/storage";
 import { setSchema } from "../schema";
 import { z } from "zod";
-import { Type } from "@prisma/client";
+import { Type } from "database";
 
 export async function getCharacterFull(characterName: string) {
   return await db.character.findFirst({

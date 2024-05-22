@@ -2,13 +2,7 @@ import React from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTrigger,
-} from "./ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import Sidenav from "./sidenav";
 import { Menu } from "lucide-react";
 

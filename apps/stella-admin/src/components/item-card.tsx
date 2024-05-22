@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { X } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { MouseEventHandler } from "react";

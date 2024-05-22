@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { cn, formatZodError } from "@/lib/utils";
 import { AppRouter } from "@/server";
-import { Set, Stat } from "@prisma/client";
+import { Set, Stat } from "database";
 import { inferRouterOutputs } from "@trpc/server";
 import { format } from "date-fns";
 import { CalendarIcon, Star } from "lucide-react";

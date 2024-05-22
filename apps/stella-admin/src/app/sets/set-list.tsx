@@ -11,8 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Set } from "@prisma/client";
-import { format } from "date-fns";
+import type { Set } from "database";
 import {
   ArrowDownNarrowWide,
   ArrowUpNarrowWide,

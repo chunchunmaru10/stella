@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { formatZodError } from "@/lib/utils";
 import { api } from "@/trpc/client";
-import { Piece, Type } from "@prisma/client";
+import { Piece, Type } from "database";
 import { useRouter } from "next-nprogress-bar";
 import { useState } from "react";
 import SelectPiece from "./select-piece";

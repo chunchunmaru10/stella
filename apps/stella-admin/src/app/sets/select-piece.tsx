@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { InputWithLabel } from "@/components/ui/input";
-import { Piece, Type } from "@prisma/client";
+import { Piece, Type } from "database";
 import { Dispatch, FormEventHandler, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";

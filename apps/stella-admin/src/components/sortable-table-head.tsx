@@ -1,7 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { TableHead } from "./ui/table";
 import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type SortBy = {
   key: string;

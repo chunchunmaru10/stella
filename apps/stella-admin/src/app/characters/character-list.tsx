@@ -11,7 +11,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useRouter } from "next-nprogress-bar";
-import { Character } from "@prisma/client";
+import { Character } from "database";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
