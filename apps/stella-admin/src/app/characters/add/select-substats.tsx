@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Stat } from "@prisma/client";
+import { Stat } from "database";
 import { Plus, X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import Image from "next/image";
