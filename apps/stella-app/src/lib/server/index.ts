@@ -8,7 +8,7 @@ export async function getDbData() {
 			include: {
 				characters: {
 					include: {
-						characterMainStat: true,
+						characterMainStats: true,
 						characterSubstats: true
 					}
 				},
@@ -31,7 +31,7 @@ export async function getDbData() {
 		db.character.findMany({
 			include: {
 				sets: true,
-				characterMainStat: true,
+				characterMainStats: true,
 				characterSubstats: true
 			}
 		})
@@ -164,7 +164,7 @@ export function rateRelic(
 		if (!character.sets.find((set) => set.name === matchedSet.name)) continue;
 
 		// if character's matched set's type does not have the correct main stats
-		const mainStatsWithMatchedType = character.characterMainStat.filter(
+		const mainStatsWithMatchedType = character.characterMainStats.filter(
 			(stat) => stat.typeName === matchedType.name
 		);
 		// if this type has more than 1 main stats (means its not head or hands), then it is the only mainstat that the relic can get,

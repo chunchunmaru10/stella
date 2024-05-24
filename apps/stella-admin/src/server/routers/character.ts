@@ -44,7 +44,7 @@ export const characterRouter = router({
             name: set,
           })),
         },
-        characterMainStat: {
+        characterMainStats: {
           createMany: {
             data: input.mainStats.map(({ stat, type }) => ({
               statName: stat,
@@ -101,12 +101,12 @@ export const characterRouter = router({
 
       const newMainStats = input.mainStats.filter(
         (newStats) =>
-          !originalCharacter.characterMainStat.find(
+          !originalCharacter.characterMainStats.find(
             (ori) =>
               ori.statName === newStats.stat && ori.typeName === newStats.type,
           ),
       );
-      const removedMainStats = originalCharacter.characterMainStat.filter(
+      const removedMainStats = originalCharacter.characterMainStats.filter(
         (ori) =>
           !input.mainStats.find(
             (stat) => stat.stat === ori.statName && stat.type === ori.typeName,
@@ -141,7 +141,7 @@ export const characterRouter = router({
               name: set,
             })),
           },
-          characterMainStat: {
+          characterMainStats: {
             deleteMany: removedMainStats.map((stat) => ({
               statName: stat.statName,
               typeName: stat.typeName,

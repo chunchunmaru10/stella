@@ -9,4 +9,15 @@ export const statRouter = router({
       },
     });
   }),
+  getAllStats: procedure.query(async () => {
+    return await db.stat.findMany({
+      include: {
+        mainStatScalings: true,
+        subStatScalings: true,
+      },
+      orderBy: {
+        sortOrder: "asc",
+      },
+    });
+  }),
 });

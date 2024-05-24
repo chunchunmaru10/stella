@@ -14,7 +14,7 @@ export async function getCharacterFull(characterName: string) {
   return await db.character.findFirst({
     include: {
       sets: true,
-      characterMainStat: {
+      characterMainStats: {
         include: {
           stat: true,
           type: true,
@@ -39,6 +39,19 @@ export async function getSetFull(setName: string) {
     },
     where: {
       name: setName,
+    },
+  });
+}
+
+export async function getStatFull(statName: string) {
+  return await db.stat.findFirst({
+    include: {
+      mainStatScalings: true,
+      characterSubstats: true,
+      types: true,
+    },
+    where: {
+      name: statName,
     },
   });
 }

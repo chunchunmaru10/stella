@@ -29,16 +29,6 @@ import SelectMainStats from "./add/select-main-stats";
 import { api } from "@/trpc/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next-nprogress-bar";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { getCharacterFull } from "@/lib/server/utils";
 import ConfirmDeleteDialog from "@/components/confirm-delete-dialog";
 
@@ -55,7 +45,6 @@ export default function CharacterForm({
   allSubstats,
   existingCharacter,
 }: Props) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [name, setName] = useState(existingCharacter?.name ?? "");
   const [thumbnailUrl, setThumbnailUrl] = useState(
     existingCharacter?.thumbnail ?? "",
@@ -74,7 +63,7 @@ export default function CharacterForm({
       type: string;
     })[]
   >(
-    existingCharacter?.characterMainStat.map(({ stat, type }) => ({
+    existingCharacter?.characterMainStats.map(({ stat, type }) => ({
       ...stat,
       type: type.name,
     })) ?? [],

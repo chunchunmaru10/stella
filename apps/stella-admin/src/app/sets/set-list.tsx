@@ -32,8 +32,8 @@ export default function SetList({ allSets }: { allSets: Set[] }) {
   const filteredAndSortedSets = useMemo(
     () =>
       allSets
-        .filter((c) =>
-          c.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
+        .filter((s) =>
+          s.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
         )
         .sort((a, b) => {
           const smaller = sortOrder === "asc" ? a : b;

@@ -1,28 +1,36 @@
 "use client";
 
-import Image from "next/image";
+import PaginationFull from "@/components/pagination-full";
 import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next-nprogress-bar";
-import { Character } from "database";
+import { Input } from "@/components/ui/input";
+import {
+  ArrowDownNarrowWide,
+  ArrowUpNarrowWide,
+  Check,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { inferRouterOutputs } from "@trpc/server";
+import { AppRouter } from "@/server";
 import SortableTableHead from "@/components/sortable-table-head";
-import PaginationFull from "@/components/pagination-full";
 
-export default function CharacterList({
-  allCharacters,
+export default function StatList({
+  allStats,
 }: {
-  allCharacters: Character[];
+  allStats: inferRouterOutputs<AppRouter>["stat"]["getAllStats"];
 }) {
   const pageSize = 7;
 
@@ -32,40 +40,41 @@ export default function CharacterList({
     key: string;
     order: "asc" | "desc";
   }>({
-    key: "Name",
+    key: "Sort Order",
     order: "asc",
   });
-  const filteredAndSortedCharacters = useMemo(
+  const filteredAndSortedStats = useMemo(
     () =>
-      allCharacters
-        .filter((c) =>
-          c.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
+      allStats
+        .filter((s) =>
+          s.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
         )
         .sort((a, b) => {
           const smaller = sortBy.order === "asc" ? a : b;
           const bigger = sortBy.order === "asc" ? b : a;
 
           switch (sortBy.key) {
-            case "Rarity":
-              return bigger.rarity - smaller.rarity;
-            case "Release Date":
+            case "Name":
+              return smaller.name.localeCompare(bigger.name);
+            case "Can Be Main Stat":
               return (
-                bigger.releaseDate.getTime() - smaller.releaseDate.getTime()
+                bigger.mainStatScalings.length - smaller.mainStatScalings.length
+              );
+            case "Can Be Substat":
+              return (
+                bigger.subStatScalings.length - smaller.subStatScalings.length
               );
             default:
-              return smaller.name.localeCompare(bigger.name);
+              return smaller.sortOrder - bigger.sortOrder;
           }
         }),
-    [sortBy, filterText, allCharacters],
+    [sortBy, filterText, allStats],
   );
   const router = useRouter();
 
   const maxPage = useMemo(() => {
-    return Math.max(
-      0,
-      Math.ceil(filteredAndSortedCharacters.length / pageSize) - 1,
-    );
-  }, [filteredAndSortedCharacters]);
+    return Math.max(0, Math.ceil(filteredAndSortedStats.length / pageSize) - 1);
+  }, [filteredAndSortedStats]);
 
   useEffect(() => {
     if (currentPage > maxPage) setCurrentPage(maxPage);
@@ -88,7 +97,7 @@ export default function CharacterList({
           />
         </div>
         <Button asChild>
-          <Link href="/characters/add">
+          <Link href="/sets/add">
             <Plus size={16} /> <span className="ml-2">Add New</span>
           </Link>
         </Button>
@@ -97,42 +106,41 @@ export default function CharacterList({
         <TableHeader>
           <TableRow>
             <SortableTableHead
-              className="w-2/3 min-w-64"
               columnName="Name"
+              className="w-2/3 min-w-64"
               sortBy={sortBy}
               setSortBy={setSortBy}
             />
-            <SortableTableHead
-              columnName="Rarity"
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-            />
-            <SortableTableHead
-              columnName="Release Date"
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-            />
+            {["Can Be Main Stat", "Can Be Substat", "Sort Order"].map((th) => (
+              <SortableTableHead
+                key={th}
+                className="min-w-44"
+                columnName={th}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+              />
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAndSortedCharacters.length ? (
-            filteredAndSortedCharacters
+          {filteredAndSortedStats.length ? (
+            filteredAndSortedStats
               .slice(
                 Math.min(
                   currentPage * pageSize,
-                  Math.max(filteredAndSortedCharacters.length - 1, 0),
+                  Math.max(filteredAndSortedStats.length - 1, 0),
                 ),
                 Math.min(
                   (currentPage + 1) * pageSize,
-                  filteredAndSortedCharacters.length + pageSize - 1,
+                  filteredAndSortedStats.length + pageSize - 1,
                 ),
               )
-              .map((character) => (
+              .map((stat) => (
                 <TableRow
-                  key={character.name}
+                  key={stat.name}
                   role="link"
                   onClick={() => {
-                    router.push(`/characters/${character.name}`, {
+                    router.push(`/stats/${stat.name}`, {
                       scroll: false,
                     });
                   }}
@@ -141,16 +149,21 @@ export default function CharacterList({
                 >
                   <TableCell className="flex items-center gap-4">
                     <Image
-                      src={character.thumbnail}
-                      alt={character.name}
+                      src={stat.thumbnail}
+                      alt={stat.name}
                       width={40}
                       height={40}
                       className="aspect-square object-scale-down"
                     />
-                    {character.name}
+                    {stat.name}
                   </TableCell>
-                  <TableCell>{character.rarity}</TableCell>
-                  <TableCell>{format(character.releaseDate, "PP")}</TableCell>
+                  <TableCell>
+                    {stat.mainStatScalings.length > 0 ? <Check /> : <X />}
+                  </TableCell>
+                  <TableCell>
+                    {stat.subStatScalings.length > 0 ? <Check /> : <X />}
+                  </TableCell>
+                  <TableCell>{stat.sortOrder}</TableCell>
                 </TableRow>
               ))
           ) : (
@@ -159,7 +172,7 @@ export default function CharacterList({
                 colSpan={3}
                 className="text-center text-muted-foreground"
               >
-                No Characters Found
+                No Stats Found
               </TableCell>
             </TableRow>
           )}

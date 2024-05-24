@@ -16,6 +16,10 @@ export default function Sidenav() {
       href: "/sets",
       text: "Relic Sets",
     },
+    {
+      href: "/stats",
+      text: "Stats",
+    },
   ];
 
   return (
