@@ -14,17 +14,19 @@ export default function ThumbnailInput({
   return (
     <>
       {thumbnailUrl ? (
-        <div className="grid w-full items-center gap-1.5">
+        <div className="grid w-full max-w-full items-center gap-1.5">
           <p className="text-sm font-medium leading-none">Thumbnail</p>
-          <ItemCard
-            item={{
-              name: thumbnailText,
-              thumbnail: thumbnailUrl,
-            }}
-            onClick={() => {
-              setThumbnailUrl("");
-            }}
-          />
+          <div>
+            <ItemCard
+              item={{
+                name: thumbnailText,
+                thumbnail: thumbnailUrl,
+              }}
+              onClick={() => {
+                setThumbnailUrl("");
+              }}
+            />
+          </div>
         </div>
       ) : (
         <InputWithLabel

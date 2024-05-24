@@ -8,7 +8,8 @@ export default async function EditStatPage({
 }: {
   params: { stat: string };
 }) {
-  const statName = decodeURI(params.stat);
+  const statName = decodeURIComponent(params.stat);
+  console.log(params.stat);
   const stat = await getStatFull(statName);
   const allRarities = await db.rarity.findMany();
 

@@ -115,7 +115,7 @@ export default function SetList({ allSets }: { allSets: Set[] }) {
                   key={set.name}
                   role="link"
                   onClick={() => {
-                    router.push(`/sets/${set.name}`, {
+                    router.push(`/sets/${encodeURIComponent(set.name)}`, {
                       scroll: false,
                     });
                   }}

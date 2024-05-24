@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { InputWithLabel } from "@/components/ui/input";
 import { getStatFull } from "@/lib/server/utils";
+import { Save } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
@@ -22,8 +23,8 @@ export default function StatForm({ existingStat }: Props) {
 
   return (
     <>
-      <div className="sticky top-0 flex items-center justify-between bg-background pb-4">
-        <h1 className="text-2xl font-bold">
+      <div className="sticky top-0 flex items-center justify-between bg-background px-2 py-4">
+        <h1 className="mr-4 text-2xl font-bold">
           {existingStat ? `Edit Stat` : "Add Stat"}
         </h1>
         <div className="flex items-center gap-4">
@@ -44,11 +45,18 @@ export default function StatForm({ existingStat }: Props) {
               // else startEditCharacter();
             }}
           >
-            {existingStat ? "Save Changes" : "Add Character"}
+            {existingStat ? (
+              <>
+                <Save size={20} />
+                <span className="ml-2 hidden md:block">Save Changes</span>
+              </>
+            ) : (
+              "Add Character"
+            )}
           </Button>
         </div>
       </div>
-      <form className="mt-4 flex flex-col gap-6">
+      <form className="mt-4 flex flex-col gap-6 px-2">
         <InputWithLabel
           label="Character Name"
           id="characterName"
@@ -77,10 +85,7 @@ export default function StatForm({ existingStat }: Props) {
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center p-4">
-                <p className="text-center text-muted-foreground">
-                  This stat does not have main stat scaling.
-                </p>
-                <Button className="mt-4">Configure</Button>
+                <Button>Configure</Button>
               </CardContent>
             </Card>
           )}

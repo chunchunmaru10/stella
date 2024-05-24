@@ -9,7 +9,7 @@ export default async function EditSetPage({
 }: {
   params: { set: string };
 }) {
-  const setName = decodeURI(params.set);
+  const setName = decodeURIComponent(params.set);
   const set = await getSetFull(setName);
   const allTypes = await api.type.getAllTypes.query();
 

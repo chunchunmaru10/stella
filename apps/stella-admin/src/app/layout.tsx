@@ -38,7 +38,7 @@ export default function RootLayout({
                 <div className="hidden lg:block">
                   <Sidenav />
                 </div>
-                <main className="h-[calc(100svh-7rem)] max-w-full flex-grow px-4">
+                <main className="h-[calc(100svh-7rem)] max-w-full flex-grow lg:pl-4">
                   {children}
                 </main>
               </div>

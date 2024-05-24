@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
+import { Trash } from "lucide-react";
 
 type Props = {
   buttonText: string;
@@ -27,7 +28,10 @@ export default function ConfirmDeleteDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">{buttonText}</Button>
+        <Button variant="destructive">
+          <Trash size={20} />
+          <span className="ml-2 hidden md:block">{buttonText}</span>
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

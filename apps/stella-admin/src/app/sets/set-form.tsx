@@ -13,6 +13,7 @@ import { useState } from "react";
 import SelectPiece from "./select-piece";
 import { getSetFull } from "@/lib/server/utils";
 import ConfirmDeleteDialog from "@/components/confirm-delete-dialog";
+import { Save } from "lucide-react";
 
 type Props = {
   allTypes: Type[];
@@ -145,8 +146,8 @@ export default function SetForm({ allTypes, existingSet }: Props) {
 
   return (
     <>
-      <div className="sticky top-0 flex items-center justify-between bg-background pb-4">
-        <h1 className="text-2xl font-bold">
+      <div className="sticky top-0 flex items-center justify-between bg-background px-2 py-4">
+        <h1 className="mr-4 text-2xl font-bold">
           {existingSet ? "Edit" : "Add"} Set
         </h1>
         <div className="flex items-center gap-4">
@@ -165,11 +166,18 @@ export default function SetForm({ allTypes, existingSet }: Props) {
             }}
             isLoading={addSetLoading || editSetIsLoading}
           >
-            {existingSet ? "Save Changes" : "Add Set"}
+            {existingSet ? (
+              <>
+                <Save size={20} />
+                <span className="ml-2 hidden md:block">Save Changes</span>
+              </>
+            ) : (
+              "Add Set"
+            )}
           </Button>
         </div>
       </div>
-      <div className="mt-4 flex flex-col gap-6">
+      <div className="mt-4 flex flex-col gap-6 p-2">
         <InputWithLabel
           label="Set Name"
           id="setName"

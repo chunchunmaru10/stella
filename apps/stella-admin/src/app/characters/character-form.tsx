@@ -22,7 +22,7 @@ import { AppRouter } from "@/server";
 import { Set, Stat } from "database";
 import { inferRouterOutputs } from "@trpc/server";
 import { format } from "date-fns";
-import { CalendarIcon, Star } from "lucide-react";
+import { CalendarIcon, Save, Star } from "lucide-react";
 import { useState } from "react";
 import SelectSubstats from "./add/select-substats";
 import SelectMainStats from "./add/select-main-stats";
@@ -214,8 +214,8 @@ export default function CharacterForm({
 
   return (
     <>
-      <div className="sticky top-0 flex items-center justify-between bg-background pb-4">
-        <h1 className="text-2xl font-bold">
+      <div className="sticky top-0 flex items-center justify-between bg-background px-2 py-4">
+        <h1 className="mr-4 text-2xl font-bold">
           {existingCharacter
             ? `Edit ${existingCharacter.name}`
             : "Add Character"}
@@ -236,11 +236,18 @@ export default function CharacterForm({
               else startEditCharacter();
             }}
           >
-            {existingCharacter ? "Save Changes" : "Add Character"}
+            {existingCharacter ? (
+              <>
+                <Save size={20} />
+                <span className="ml-2 hidden md:block">Save Changes</span>
+              </>
+            ) : (
+              "Add Character"
+            )}
           </Button>
         </div>
       </div>
-      <form className="mt-4 flex flex-col gap-6">
+      <form className="mt-4 flex flex-col gap-6 p-2">
         <InputWithLabel
           label="Character Name"
           id="characterName"

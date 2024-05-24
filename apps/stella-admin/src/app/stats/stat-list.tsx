@@ -97,7 +97,7 @@ export default function StatList({
           />
         </div>
         <Button asChild>
-          <Link href="/sets/add">
+          <Link href="/stats/add">
             <Plus size={16} /> <span className="ml-2">Add New</span>
           </Link>
         </Button>
@@ -140,7 +140,7 @@ export default function StatList({
                   key={stat.name}
                   role="link"
                   onClick={() => {
-                    router.push(`/stats/${stat.name}`, {
+                    router.push(`/stats/${encodeURIComponent(stat.name)}`, {
                       scroll: false,
                     });
                   }}

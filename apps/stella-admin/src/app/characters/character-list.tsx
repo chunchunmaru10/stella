@@ -132,9 +132,12 @@ export default function CharacterList({
                   key={character.name}
                   role="link"
                   onClick={() => {
-                    router.push(`/characters/${character.name}`, {
-                      scroll: false,
-                    });
+                    router.push(
+                      `/characters/${encodeURIComponent(character.name)}`,
+                      {
+                        scroll: false,
+                      },
+                    );
                   }}
                   className="cursor-pointer"
                   tabIndex={0}

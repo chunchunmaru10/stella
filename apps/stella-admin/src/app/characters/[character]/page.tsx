@@ -8,7 +8,7 @@ export default async function EditCharacterPage({
 }: {
   params: { character: string };
 }) {
-  const characterName = decodeURI(params.character);
+  const characterName = decodeURIComponent(params.character);
   const character = await getCharacterFull(characterName);
   const allSets = await api.set.getAllSets.query();
   const allTypes = await api.type.getAllTypesExcludingFixed.query();
