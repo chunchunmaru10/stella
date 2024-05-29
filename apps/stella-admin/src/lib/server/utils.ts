@@ -47,7 +47,7 @@ export async function getStatFull(statName: string) {
   return await db.stat.findFirst({
     include: {
       mainStatScalings: true,
-      characterSubstats: true,
+      subStatScalings: true,
       types: true,
     },
     where: {

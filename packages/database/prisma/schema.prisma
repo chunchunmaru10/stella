@@ -32,8 +32,8 @@ model Stat {
   characterSubstats  CharacterSubstat[]
   characterMainStats CharacterMainStat[]
   types              Type[]
-  mainStatScalings   StatScaling[]       @relation("mainStatScalings")
-  subStatScalings    StatScaling[]       @relation("subStatScalings")
+  mainStatScalings   MainStatScaling[]
+  subStatScalings    SubstatScaling[]
 }
 
 model Piece {
@@ -76,18 +76,28 @@ model CharacterMainStat {
 }
 
 model Rarity {
-  rarity      Int           @id
-  StatScaling StatScaling[]
+  rarity         Int               @id
+  StatScaling    MainStatScaling[]
+  SubstatScaling SubstatScaling[]
 }
 
-model StatScaling {
+model MainStatScaling {
   rarity       Rarity @relation(fields: [rarityId], references: [rarity])
-  mainStat     Stat?  @relation("mainStatScalings", fields: [statName], references: [name], map: "mainStatScalings")
-  subStat      Stat?  @relation("subStatScalings", fields: [statName], references: [name], map: "subStatScalings")
+  stat         Stat   @relation(fields: [statName], references: [name])
   rarityId     Int
   statName     String
-  initialValue Float
-  scalingvalue Float
+  baseValue    Float
+  scalingValue Float
 
-  @@id([rarityId, statName, initialValue])
+  @@id([rarityId, statName])
+}
+
+model SubstatScaling {
+  Stat         Stat   @relation(fields: [statName], references: [name])
+  rarity       Rarity @relation(fields: [rarityId], references: [rarity])
+  statName     String
+  rarityId     Int
+  scalingValue Float
+
+  @@id([statName, rarityId, scalingValue])
 }
