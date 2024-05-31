@@ -1,4 +1,6 @@
-import React, { ReactNode, useState } from "react";
+"use client";
+
+import { ReactNode, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import ItemCard from "./item-card";
@@ -57,32 +59,34 @@ export function MultiSelectDialog({
             <Filter className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           </div>
           <ScrollArea className="max-w-full flex-grow">
-            {allItems.map((item) => (
-              <div key={item.name} className="mb-4">
-                <ItemCard
-                  item={item}
-                  showClose={false}
-                  active={
-                    activeItems.find(
-                      (activeItem) => item.name === activeItem.name,
-                    ) !== undefined
-                  }
-                  onClick={() => {
-                    if (
+            {allItems
+              .filter((i) => i.name.toLocaleLowerCase().includes(filterText))
+              .map((item) => (
+                <div key={item.name} className="mb-4">
+                  <ItemCard
+                    item={item}
+                    showClose={false}
+                    active={
                       activeItems.find(
-                        (activeItem) => activeItem.name === item.name,
+                        (activeItem) => item.name === activeItem.name,
+                      ) !== undefined
+                    }
+                    onClick={() => {
+                      if (
+                        activeItems.find(
+                          (activeItem) => activeItem.name === item.name,
+                        )
                       )
-                    )
-                      setActiveItems(
-                        activeItems.filter(
-                          (activeItem) => item.name !== activeItem.name,
-                        ),
-                      );
-                    else setActiveItems([...activeItems, item]);
-                  }}
-                />
-              </div>
-            ))}
+                        setActiveItems(
+                          activeItems.filter(
+                            (activeItem) => item.name !== activeItem.name,
+                          ),
+                        );
+                      else setActiveItems([...activeItems, item]);
+                    }}
+                  />
+                </div>
+              ))}
           </ScrollArea>
           <div className="flex justify-end gap-4 px-1">
             <Button
