@@ -75,7 +75,7 @@ export const characterRouter = router({
       const originalCharacter = await getCharacterFull(input.originalName);
 
       if (!originalCharacter)
-        throw new Error(`Cannot find a ${input.originalName} to edit.`);
+        throw new Error(`Cannot find ${input.originalName} to edit.`);
 
       let imageUrl = originalCharacter.thumbnail;
       // reupload image if either name or thumbnail url is different

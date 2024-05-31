@@ -56,6 +56,7 @@ export default function TableCellInput({
         >
           <InputWithLabel
             type="number"
+            step="any"
             label={label}
             value={inputValue ?? ""}
             onChange={(e) =>

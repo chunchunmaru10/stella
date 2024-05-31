@@ -14,9 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "@/components/ui/use-toast";
 import { getStatFull } from "@/lib/server/utils";
+import { formatZodError } from "@/lib/utils";
+import { api } from "@/trpc/client";
 import { MainStatScaling, SubstatScaling } from "database";
 import { Save, Star } from "lucide-react";
+import { useRouter } from "next-nprogress-bar";
 import { useMemo, useState } from "react";
 
 type Props = {
@@ -25,6 +29,7 @@ type Props = {
 };
 
 export default function StatForm({ existingStat, allRarities }: Props) {
+  const router = useRouter();
   const [name, setName] = useState(existingStat?.name ?? "");
   const [thumbnailUrl, setThumbnailUrl] = useState(
     existingStat?.thumbnail ?? "",
@@ -64,6 +69,28 @@ export default function StatForm({ existingStat, allRarities }: Props) {
 
     return currentMax + 1;
   }, [substatScalings]);
+  const { mutate: editStat, isLoading: editStatIsLoading } =
+    api.stat.editStat.useMutation({
+      onSuccess: () => {
+        toast({
+          variant: "default",
+          description: `${existingStat?.name ?? "Set"} edited successfully`,
+        });
+        router.replace("/stats");
+      },
+      onError: (e) => {
+        const fieldErrors = e.data?.zodError?.fieldErrors;
+        let message = "";
+
+        if (fieldErrors) message = formatZodError(e.data.zodError);
+        else message = e.message;
+
+        toast({
+          variant: "destructive",
+          description: message,
+        });
+      },
+    });
 
   function handleSubstatInputChange(
     value: number | undefined,
@@ -92,6 +119,38 @@ export default function StatForm({ existingStat, allRarities }: Props) {
     }
   }
 
+  function startEditStat() {
+    try {
+      if (!existingStat) throw new Error("Cannot edit this stat");
+      if (!name) throw new Error("Name is required");
+      if (!thumbnailUrl) throw new Error("Thumbnail is required.");
+      if (sortOrder === undefined) throw new Error("Sort order is required");
+
+      editStat({
+        name,
+        thumbnail: thumbnailUrl,
+        sortOrder,
+        mainStatScalings: {
+          canBeMainStat: showMainStatTable,
+          scalings: mainStatScalings,
+        },
+        subStatScalings: {
+          canBeSubstat: showSubstatTable,
+          scalings: substatScalings,
+        },
+        originalName: existingStat.name,
+      });
+    } catch (e) {
+      let description = "Something went wrong. Please try again.";
+      if (e instanceof Error) description = e.message;
+
+      toast({
+        variant: "destructive",
+        description,
+      });
+    }
+  }
+
   return (
     <>
       <div className="sticky top-0 flex items-center justify-between bg-background px-2 py-4">
@@ -99,31 +158,9 @@ export default function StatForm({ existingStat, allRarities }: Props) {
           {existingStat ? `Edit Stat` : "Add Stat"}
         </h1>
         <div className="flex items-center gap-4">
-          {existingStat && (
-            <ConfirmDeleteDialog
-              buttonText={`Delete ${existingStat.name}`}
-              deleteObjectName={existingStat.name}
-              onConfirm={() => {}}
-              isLoading={false}
-              // onConfirm={() => deleteCharacter(existingCharacter.name)}
-              // isLoading={deleteCharacterIsLoading}
-            />
-          )}
-          <Button
-            // isLoading={addCharacterIsLoading || editCharacterIsLoading}
-            onClick={() => {
-              // if (!existingCharacter) startAddCharacter();
-              // else startEditCharacter();
-            }}
-          >
-            {existingStat ? (
-              <>
-                <Save size={20} />
-                <span className="ml-2 hidden md:block">Save Changes</span>
-              </>
-            ) : (
-              "Add Character"
-            )}
+          <Button isLoading={editStatIsLoading} onClick={startEditStat}>
+            <Save size={20} />
+            <span className="ml-2 hidden md:block">Save Changes</span>
           </Button>
         </div>
       </div>

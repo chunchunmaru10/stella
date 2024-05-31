@@ -77,3 +77,31 @@ export const setSchema = z.object({
     .min(2, { message: "Too little pieces." })
     .max(4, { message: "Too many pieces" }),
 });
+
+export const statSchema = z.object({
+  name: z.string().min(1, "Stat name is required"),
+  thumbnail: z
+    .string()
+    .min(1, "Thumbnail is required")
+    .url("Invalid thumbnail URL"),
+  sortOrder: z.number(),
+  mainStatScalings: z.object({
+    canBeMainStat: z.boolean(),
+    scalings: z.array(
+      z.object({
+        rarityId: z.number().positive("Invalid rarity"),
+        baseValue: z.number().positive("Base value must be positive"),
+        scalingValue: z.number().positive("Scaling value must be positive"),
+      }),
+    ),
+  }),
+  subStatScalings: z.object({
+    canBeSubstat: z.boolean(),
+    scalings: z.array(
+      z.object({
+        rarityId: z.number().positive("Invalid rarity"),
+        scalingValue: z.number().positive("Invalid scaling value"),
+      }),
+    ),
+  }),
+});
