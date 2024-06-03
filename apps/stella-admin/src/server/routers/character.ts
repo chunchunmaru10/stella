@@ -2,8 +2,6 @@ import { characterSchema } from "@/lib/schema";
 import { db } from "database";
 import { procedure, router } from "../trpc";
 import { z } from "zod";
-import { deleteObject, ref } from "firebase/storage";
-import { firebaseStorage } from "../firebase";
 import {
   deleteImage,
   getCharacterFull,

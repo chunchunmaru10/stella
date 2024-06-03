@@ -20,6 +20,10 @@ export default function Sidenav() {
       href: "/stats",
       text: "Stats",
     },
+    {
+      href: "/rarities",
+      text: "Rarities",
+    },
   ];
 
   return (

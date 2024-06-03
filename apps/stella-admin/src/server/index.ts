@@ -1,4 +1,5 @@
 import { characterRouter } from "./routers/character";
+import { rarityRouter } from "./routers/rarity";
 import { setRouter } from "./routers/set";
 import { statRouter } from "./routers/stat";
 import { typeRouter } from "./routers/type";
@@ -9,6 +10,7 @@ export const appRouter = router({
   set: setRouter,
   type: typeRouter,
   stat: statRouter,
+  rarity: rarityRouter,
 });
 
 export type AppRouter = typeof appRouter;
