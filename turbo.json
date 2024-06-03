@@ -7,7 +7,7 @@
       "persistent": true
     },
     "build": {
-      "dependsOn": ["^db:generate", "^build"],
+      "dependsOn": ["^db:push", "^db:generate", "^build"],
       "outputs": [".svelte-kit/**", ".vercel/**", ".next/**", "!.next/cache/**"]
     },
     "db:generate": {
