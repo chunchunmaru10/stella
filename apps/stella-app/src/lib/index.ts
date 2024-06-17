@@ -12,6 +12,70 @@ export function camelize(str: string) {
 	});
 }
 
+export function getStatValue(a: number, b: number, displayPercentage: boolean) {
+	if (displayPercentage) {
+		a = Math.floor(a * 10) / 10;
+		b = Math.floor(b * 10) / 10;
+	} else {
+		a = Math.floor(a);
+		b = Math.floor(b);
+	}
+
+	return [a, b];
+}
+
+export function findCombination(
+	numbers: number[],
+	target: number,
+	displayPercentage: boolean
+): number[] | null {
+	// Sort the numbers in descending order to prioritize larger numbers
+	numbers.sort((a, b) => b - a);
+
+	// Helper function to check if two numbers are approximately equal
+	function approximatelyEqual(a: number, b: number): boolean {
+		[a, b] = getStatValue(a, b, displayPercentage);
+		return a === b;
+	}
+
+	function backtrack(
+		startIndex: number,
+		currentSum: number,
+		combination: number[]
+	): number[] | null {
+		// Base case: if current sum matches the target, return the combination
+		if (approximatelyEqual(currentSum, target)) {
+			return combination;
+		}
+
+		// If current sum exceeds the target, backtrack
+		if (currentSum > target || startIndex >= numbers.length) {
+			return null;
+		}
+
+		// Try each number in the array from the current index
+		for (let i = startIndex; i < numbers.length; i++) {
+			const num = numbers[i];
+			// Include the current number in the combination
+			combination.push(num);
+			// Recur with the updated sum and combination, starting from the current index
+			const result = backtrack(i, currentSum + num, combination);
+			// If a valid combination is found, return it
+			if (result) {
+				return result;
+			}
+			// Remove the last number from the combination to backtrack
+			combination.pop();
+		}
+
+		// If no combination is found, return null
+		return null;
+	}
+
+	// Start backtracking from the beginning of the array
+	return backtrack(0, 0, []);
+}
+
 export function getUsableCharactersFromRelic(relic: Relic, settings: Settings) {
 	return {
 		...relic,

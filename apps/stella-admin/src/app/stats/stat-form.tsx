@@ -6,6 +6,8 @@ import ThumbnailInput from "@/components/thumbnail-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { InputWithLabel } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -35,6 +37,9 @@ export default function StatForm({ existingStat, allRarities }: Props) {
     existingStat?.thumbnail ?? "",
   );
   const [sortOrder, setSortOrder] = useState(existingStat?.sortOrder);
+  const [showPercentage, setShowPercentage] = useState(
+    existingStat?.displayPercentage,
+  );
   const [showMainStatTable, setShowMainStatTable] = useState(
     !!existingStat?.mainStatScalings.length,
   );
@@ -125,11 +130,14 @@ export default function StatForm({ existingStat, allRarities }: Props) {
       if (!name) throw new Error("Name is required");
       if (!thumbnailUrl) throw new Error("Thumbnail is required.");
       if (sortOrder === undefined) throw new Error("Sort order is required");
+      if (showPercentage === undefined)
+        throw new Error("Show percentage must be set");
 
       editStat({
         name,
         thumbnail: thumbnailUrl,
         sortOrder,
+        showPercentage,
         mainStatScalings: {
           canBeMainStat: showMainStatTable,
           scalings: mainStatScalings,
@@ -186,6 +194,14 @@ export default function StatForm({ existingStat, allRarities }: Props) {
               setSortOrder(Number.parseInt(e.target.value));
           }}
         />
+        <Card className="flex items-center space-x-4 p-4">
+          <Switch
+            id="showPercentage"
+            checked={showPercentage}
+            onCheckedChange={setShowPercentage}
+          />
+          <Label htmlFor="showPercentage">Show Percentage</Label>
+        </Card>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card
             className={`flex items-center gap-4 p-4 ${showMainStatTable ? "border-white border-opacity-70" : ""}`}
@@ -235,88 +251,90 @@ export default function StatForm({ existingStat, allRarities }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allRarities.map((rarity) => {
-                    const matchedScaling = mainStatScalings.find(
-                      (s) => s.rarityId === rarity,
-                    );
-                    return (
-                      <TableRow key={rarity}>
-                        <TableCell className="inline-flex w-20 items-center gap-1">
-                          {rarity} <Star size={16} />
-                        </TableCell>
-                        <TableCellInput
-                          value={matchedScaling?.baseValue}
-                          label="Base Value"
-                          onValueChange={(newValue) => {
-                            const index = mainStatScalings.findIndex(
-                              (s) => s.id === matchedScaling?.id,
-                            );
-
-                            if (index === -1 && newValue)
-                              setMainStatScalings([
-                                ...mainStatScalings,
-                                {
-                                  id: crypto.randomUUID(),
-                                  baseValue: newValue,
-                                  rarityId: rarity,
-                                  scalingValue: 0,
-                                  statName: "",
-                                },
-                              ]);
-                            else if (!newValue) {
-                              setMainStatScalings(
-                                mainStatScalings.filter(
-                                  (s) => s.id !== matchedScaling?.id,
-                                ),
+                  {allRarities
+                    .sort((a, b) => a - b)
+                    .map((rarity) => {
+                      const matchedScaling = mainStatScalings.find(
+                        (s) => s.rarityId === rarity,
+                      );
+                      return (
+                        <TableRow key={rarity}>
+                          <TableCell className="inline-flex w-20 items-center gap-1">
+                            {rarity} <Star size={16} />
+                          </TableCell>
+                          <TableCellInput
+                            value={matchedScaling?.baseValue}
+                            label="Base Value"
+                            onValueChange={(newValue) => {
+                              const index = mainStatScalings.findIndex(
+                                (s) => s.id === matchedScaling?.id,
                               );
-                            } else {
-                              const found = mainStatScalings[index];
-                              found.baseValue = newValue;
-                              setMainStatScalings([...mainStatScalings]);
-                            }
-                          }}
-                        />
-                        <TableCellInput
-                          value={matchedScaling?.scalingValue}
-                          label="Scaling Value"
-                          onValueChange={(newValue) => {
-                            const index = mainStatScalings.findIndex(
-                              (s) => s.id === matchedScaling?.id,
-                            );
 
-                            if (index === -1 && newValue)
-                              setMainStatScalings([
-                                ...mainStatScalings,
-                                {
-                                  id: crypto.randomUUID(),
-                                  baseValue: 0,
-                                  rarityId: rarity,
-                                  scalingValue: newValue,
-                                  statName: "",
-                                },
-                              ]);
-                            else if (index !== -1 && !newValue) {
-                              if (mainStatScalings[index].baseValue !== 0) {
-                                const found = mainStatScalings[index];
-                                found.scalingValue = 0;
-                                setMainStatScalings([...mainStatScalings]);
-                              } else {
+                              if (index === -1 && newValue)
+                                setMainStatScalings([
+                                  ...mainStatScalings,
+                                  {
+                                    id: crypto.randomUUID(),
+                                    baseValue: newValue,
+                                    rarityId: rarity,
+                                    scalingValue: 0,
+                                    statName: "",
+                                  },
+                                ]);
+                              else if (!newValue) {
                                 setMainStatScalings(
                                   mainStatScalings.filter(
                                     (s) => s.id !== matchedScaling?.id,
                                   ),
                                 );
+                              } else {
+                                const found = mainStatScalings[index];
+                                found.baseValue = newValue;
+                                setMainStatScalings([...mainStatScalings]);
                               }
-                            } else if (index !== -1 && newValue) {
-                              const found = mainStatScalings[index];
-                              found.scalingValue = newValue;
-                              setMainStatScalings([...mainStatScalings]);
-                            }
-                          }}
-                        />
-                      </TableRow>
-                    );
-                  })}
+                            }}
+                          />
+                          <TableCellInput
+                            value={matchedScaling?.scalingValue}
+                            label="Scaling Value"
+                            onValueChange={(newValue) => {
+                              const index = mainStatScalings.findIndex(
+                                (s) => s.id === matchedScaling?.id,
+                              );
+
+                              if (index === -1 && newValue)
+                                setMainStatScalings([
+                                  ...mainStatScalings,
+                                  {
+                                    id: crypto.randomUUID(),
+                                    baseValue: 0,
+                                    rarityId: rarity,
+                                    scalingValue: newValue,
+                                    statName: "",
+                                  },
+                                ]);
+                              else if (index !== -1 && !newValue) {
+                                if (mainStatScalings[index].baseValue !== 0) {
+                                  const found = mainStatScalings[index];
+                                  found.scalingValue = 0;
+                                  setMainStatScalings([...mainStatScalings]);
+                                } else {
+                                  setMainStatScalings(
+                                    mainStatScalings.filter(
+                                      (s) => s.id !== matchedScaling?.id,
+                                    ),
+                                  );
+                                }
+                              } else if (index !== -1 && newValue) {
+                                const found = mainStatScalings[index];
+                                found.scalingValue = newValue;
+                                setMainStatScalings([...mainStatScalings]);
+                              }
+                            }}
+                          />
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>
@@ -342,39 +360,41 @@ export default function StatForm({ existingStat, allRarities }: Props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allRarities.map((rarity) => {
-                  const scalingsForThisRarity = substatScalings
-                    .filter((s) => s.rarityId === rarity)
-                    .sort((a, b) => a.scalingValue - b.scalingValue);
-                  return (
-                    <TableRow key={rarity}>
-                      <TableCell className="inline-flex w-20 items-center gap-1">
-                        {rarity} <Star size={16} />
-                      </TableCell>
-                      {scalingsForThisRarity.map((scaling) => (
+                {allRarities
+                  .sort((a, b) => a - b)
+                  .map((rarity) => {
+                    const scalingsForThisRarity = substatScalings
+                      .filter((s) => s.rarityId === rarity)
+                      .sort((a, b) => a.scalingValue - b.scalingValue);
+                    return (
+                      <TableRow key={rarity}>
+                        <TableCell className="inline-flex w-20 items-center gap-1">
+                          {rarity} <Star size={16} />
+                        </TableCell>
+                        {scalingsForThisRarity.map((scaling) => (
+                          <TableCellInput
+                            key={scaling.id}
+                            label="Scaling"
+                            value={scaling.scalingValue}
+                            onValueChange={(value) =>
+                              handleSubstatInputChange(value, scaling, rarity)
+                            }
+                          />
+                        ))}
                         <TableCellInput
-                          key={scaling.id}
                           label="Scaling"
-                          value={scaling.scalingValue}
-                          onValueChange={(value) =>
-                            handleSubstatInputChange(value, scaling, rarity)
+                          colSpan={
+                            substatsTableColumnCount -
+                            scalingsForThisRarity.length
                           }
+                          onValueChange={(value) =>
+                            handleSubstatInputChange(value, undefined, rarity)
+                          }
+                          resetAfterChange
                         />
-                      ))}
-                      <TableCellInput
-                        label="Scaling"
-                        colSpan={
-                          substatsTableColumnCount -
-                          scalingsForThisRarity.length
-                        }
-                        onValueChange={(value) =>
-                          handleSubstatInputChange(value, undefined, rarity)
-                        }
-                        resetAfterChange
-                      />
-                    </TableRow>
-                  );
-                })}
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </>

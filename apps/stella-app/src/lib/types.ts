@@ -12,7 +12,7 @@ export type RelicData = {
 	set: string;
 	type: string;
 	mainStat: string;
-	subStats: string[];
+	substats: string[];
 };
 
 export type Relic = z.infer<typeof RelicSchema>;

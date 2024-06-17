@@ -59,6 +59,7 @@ export const statRouter = router({
           name: input.name,
           thumbnail: imageUrl,
           sortOrder: input.sortOrder,
+          displayPercentage: input.showPercentage,
           mainStatScalings: {
             deleteMany: {
               statName: input.originalName,

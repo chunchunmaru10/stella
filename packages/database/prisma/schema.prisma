@@ -29,6 +29,7 @@ model Stat {
   thumbnail          String
   sortOrder          Int
   canBeSubstats      Boolean
+  displayPercentage  Boolean             @default(true)
   characterSubstats  CharacterSubstat[]
   characterMainStats CharacterMainStat[]
   types              Type[]
@@ -77,7 +78,7 @@ model CharacterMainStat {
 
 model Rarity {
   rarity         Int               @id
-  maxLevel       Int               @default(15)
+  maxLevel       Int
   StatScaling    MainStatScaling[]
   SubstatScaling SubstatScaling[]
 }

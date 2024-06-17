@@ -1,9 +1,9 @@
 import type { CharacterRelicValue, Relic } from '../types';
-import { removeSpace } from '$lib';
-import { db } from 'database';
+import { findCombination, getStatValue, removeSpace } from '$lib';
+import { db, type Stat } from 'database';
 
 export async function getDbData() {
-	const [sets, subStatList, characters] = await Promise.all([
+	const [sets, subStatList, characters, rarities] = await Promise.all([
 		db.set.findMany({
 			include: {
 				characters: {
@@ -16,7 +16,11 @@ export async function getDbData() {
 					include: {
 						type: {
 							include: {
-								stats: true
+								stats: {
+									include: {
+										mainStatScalings: true
+									}
+								}
 							}
 						}
 					}
@@ -24,6 +28,9 @@ export async function getDbData() {
 			}
 		}),
 		db.stat.findMany({
+			include: {
+				subStatScalings: true
+			},
 			where: {
 				canBeSubstats: true
 			}
@@ -34,85 +41,87 @@ export async function getDbData() {
 				characterMainStats: true,
 				characterSubstats: true
 			}
-		})
+		}),
+		db.rarity.findMany()
 	]);
 
 	return {
 		sets,
 		subStatList,
-		characters
+		characters,
+		rarities
 	};
 }
 
 export function getStatsFromRawString(
 	rawString: string,
-	mainStatList: string[],
-	subStatList: string[]
+	mainStatList: Stat[],
+	subStatList: Stat[]
 ) {
-	let mainStat = '';
-	const subStats = [];
+	let mainStat:
+		| {
+				name: string;
+				value: number;
+				displayPercentage: boolean;
+		  }
+		| undefined;
+	const substats: NonNullable<ReturnType<typeof getStatNameFromLine>>[] = [];
 	const lines = rawString.split('\n');
 
 	let mainStatLineIndex = -1;
 
 	for (const [index, line] of lines.entries()) {
 		for (const stat of mainStatList) {
-			// if the stat includes %, such as HP%, ATK%, and DEF%, check if the line has both the stat (HP) and the percentage
-			// other percentage stats (such as CRITs) is not included in this statment because they dont have the non-% variant
-			if (stat.includes('%')) {
-				if (line.includes(stat.replaceAll('%', '')) && line.includes('%')) {
-					mainStatLineIndex = index;
-					mainStat = stat;
-					break;
-				}
-			} else {
-				if (line.includes(stat)) {
-					mainStatLineIndex = index;
-					mainStat = stat;
-					break;
-				}
-			}
+			const parsedMainStat = getStatNameFromLine(
+				line,
+				stat,
+				getFlatStatsWithPercentageVariants(mainStatList.map((s) => s.name))
+			);
+
+			if (!parsedMainStat) continue;
+
+			mainStatLineIndex = index;
+			mainStat = parsedMainStat;
 		}
-		if (mainStatLineIndex !== -1) break;
+		if (mainStat) break;
 	}
 
-	if (mainStatLineIndex === -1) throw new Error('Main stat is not found');
+	if (!mainStat || mainStatLineIndex === -1) throw new Error('Main stat is not found');
 
-	if (['HP', 'ATK', 'DEF'].includes(mainStat) && lines[mainStatLineIndex].endsWith('%'))
-		mainStat += '%';
-
+	// start from the line where the mainstat is to the end
 	for (let i = mainStatLineIndex + 1; i < lines.length; i++) {
 		for (const stat of subStatList) {
-			if (lines[i].includes(stat)) {
-				let subStat = stat;
-				if (['HP', 'ATK', 'DEF'].includes(subStat) && lines[i].includes('%')) subStat += '%';
-				subStats.push(subStat);
-			}
+			const substat = getStatNameFromLine(
+				lines[i],
+				stat,
+				getFlatStatsWithPercentageVariants(subStatList.map((s) => s.name))
+			);
+			if (substat) substats.push(substat);
 
 			// stop once there are 4 substats detected
-			if (subStats.length >= 4) break;
+			if (substats.length >= 4) break;
 		}
 	}
 
 	return {
 		mainStat,
-		subStats
+		substats: substats.map((s) => ({
+			...s,
+			upgrades: [] as number[],
+			maxValue: 0
+		}))
 	};
 }
 
 export function getRelicData(
 	rawString: string,
 	sets: Awaited<ReturnType<typeof getDbData>>['sets'],
-	subStatList: Awaited<ReturnType<typeof getDbData>>['subStatList']
+	subStatList: Awaited<ReturnType<typeof getDbData>>['subStatList'],
+	rarities: Awaited<ReturnType<typeof getDbData>>['rarities']
 ) {
 	let matchedSet: (typeof sets)[number] | undefined;
 	let matchedPiece: (typeof sets)[number]['pieces'][number] | undefined;
-	let stats:
-		| {
-				mainStat: string;
-				subStats: string[];
-		  }
-		| undefined;
+	let stats: ReturnType<typeof getStatsFromRawString> | undefined;
 
 	for (const set of sets) {
 		// temporary remove line breaks because some relic set names may be too long
@@ -131,11 +140,7 @@ export function getRelicData(
 		// temporary remove line breaks because some relic set names may be too long
 		if (piece && removeSpace(rawString).includes(removeSpace(piece.name)) && piece.type?.name) {
 			matchedPiece = piece;
-			stats = getStatsFromRawString(
-				rawString,
-				piece.type.stats.map((stat) => stat.name),
-				subStatList.map((stat) => stat.name)
-			);
+			stats = getStatsFromRawString(rawString, piece.type.stats, subStatList);
 		}
 	}
 
@@ -145,16 +150,92 @@ export function getRelicData(
 
 	if (!stats) throw new Error('No stats found');
 
+	// determine level
+	// const topMaxLevel = Math.max(...rarities.map((r) => r.maxLevel)); // find the absolute max level of a relic (because different rarities have different max level)
+	const possibleLevels: {
+		rarity: number;
+		level: number;
+	}[] = [];
+	for (const rarity of rarities) {
+		for (let i = 0; i <= rarity.maxLevel; i++) {
+			const mainStatScalingAtThisRarity = matchedPiece.type.stats
+				.find((s) => s.name === stats.mainStat.name)
+				?.mainStatScalings.find((s) => s.rarityId === rarity.rarity);
+			if (!mainStatScalingAtThisRarity) continue;
+			const [a, b] = getStatValue(
+				stats.mainStat.value,
+				mainStatScalingAtThisRarity.baseValue + mainStatScalingAtThisRarity.scalingValue * i,
+				stats.mainStat.displayPercentage
+			);
+			if (a === b)
+				possibleLevels.push({
+					rarity: rarity.rarity,
+					level: i
+				});
+			// break if already found/past value
+			if (b >= a) break;
+		}
+	}
+
+	// determine substat upgrades
+	if (!possibleLevels.length) throw new Error('Could not determine relic level');
+	let foundRarity: (typeof possibleLevels)[number] | undefined = undefined;
+
+	for (const { level, rarity } of possibleLevels) {
+		// loop through each substat to see if it matches
+		const numberOfUpgrades = Math.floor(level / 3); // each substats can be upgraded once every 3 levels
+		for (const substat of stats.substats) {
+			const matchingSubstatScalingsAtThisRarity = subStatList
+				.find((s) => s.name === substat.name)
+				?.subStatScalings.filter((s) => s.rarityId === rarity);
+
+			if (!matchingSubstatScalingsAtThisRarity)
+				throw new Error('Could not determine substat value distribution');
+
+			// get max value to be used later to determine the rating penalty
+			substat.maxValue = matchingSubstatScalingsAtThisRarity.reduce(
+				(prev, curr) => Math.max(prev, curr.scalingValue),
+				0
+			);
+
+			const combo = findCombination(
+				matchingSubstatScalingsAtThisRarity.map((s) => s.scalingValue),
+				substat.value,
+				substat.displayPercentage
+			);
+
+			if (combo) substat.upgrades = combo;
+		}
+
+		// verify that the upgrades count match
+		const calculatedUpgradeCount = stats.substats.reduce((prev, curr) => {
+			return prev + curr.upgrades.length - 1; // need to minus 1 to count for the initial substat value that is also counted in the combo
+		}, 0);
+
+		const diff = numberOfUpgrades - calculatedUpgradeCount;
+		if (calculatedUpgradeCount >= 0 && (diff === 0 || diff === 1)) {
+			// different need to be 0 or 1 because we don't know whether the relic has 3 or 4 substats initially
+			foundRarity = {
+				rarity,
+				level
+			};
+			break;
+		}
+	}
+
+	if (!foundRarity) throw new Error('Could not determine relic rarity');
+
 	return {
 		matchedSet,
 		matchedPiece,
 		matchedType: matchedPiece.type,
+		...foundRarity,
 		stats
 	};
 }
 
 export function rateRelic(
-	{ matchedSet, matchedPiece, matchedType, stats }: ReturnType<typeof getRelicData>,
+	{ matchedSet, matchedPiece, matchedType, stats, level, rarity }: ReturnType<typeof getRelicData>,
 	allCharacters: Awaited<ReturnType<typeof getDbData>>['characters']
 ): Relic {
 	const matchedCharacters: CharacterRelicValue[] = [];
@@ -173,7 +254,7 @@ export function rateRelic(
 		// recommending Energy Regen for Rope) because it is matching by type instead of by character main stats
 		if (
 			matchedType.stats.length > 1 &&
-			!mainStatsWithMatchedType.find((stat) => stat.statName === stats.mainStat)
+			!mainStatsWithMatchedType.find((stat) => stat.statName === stats.mainStat.name)
 		)
 			continue;
 
@@ -209,38 +290,67 @@ export function rateRelic(
 			.sort((a, b) => b.value - a.value);
 
 		// calculate for max potential value
+		// to calculate max potential value, we assume that the relic that we have is the perfect relic at the current level
+		// so we assume that:
+		// it starts with 4 initial substats,
+		// every substat upgrades goes to the best substat
+		// every upgrade value is the max value
+		// this loop only calculates the intial values (at level 0)
 		for (let i = 0; subStatsIncluded < 4; i++) {
-			// when a character only has very little suitable substats, this check is to ensure element exists before accessing the element
+			// since already sorted descendingly, can just loop over
+			// when a character only has very little suitable substats (such as only CRIT DMG and CRIT Rate)
+			// this check is to ensure element exists before accessing the element
 			if (!subStatValues[i]) break;
 			// if this substat is the same as main stat, do not count this into the max because substats cannot contain the main stat
-			if (subStatValues[i].substat === stats.mainStat) continue;
+			if (subStatValues[i].substat === stats.mainStat.name) continue;
 
 			maxPotentialValue += subStatValues[subStatsIncluded].value;
 			subStatsIncluded++;
 		}
 
+		// then depending on the number of upgrades, add max potential value according to the max substat value found
+		// so if the max substat value is 3 (assuming there are 3 tiers of suitable substats for this char)
+		// and the number of upgrades is 3 (this relic is between level 9 and 11)
+		// this will add 3 * 3 to the total max potential value calculated from the loop
+		const numberOfUpgrades = Math.floor(level / 3);
+		const maxSubstatValue = subStatValues.reduce((prev, curr) => Math.max(prev, curr.value), 0);
+		maxPotentialValue += maxSubstatValue * numberOfUpgrades;
+
 		// calculate for actual value
 		for (const subStatValue of subStatValues) {
-			if (stats.subStats.includes(subStatValue.substat)) {
-				actualValues.push({
-					stat: subStatValue.substat,
-					value: subStatValue.value
-				});
+			const found = stats.substats.find((s) => s.name === subStatValue.substat);
+
+			if (!found) continue;
+
+			console.log(found.name + ': ' + found.upgrades);
+			for (let i = 0; i < found.upgrades.length; i++) {
+				const penaltyPercentage = found.upgrades[i] / found.maxValue;
+				console.log(
+					`${found.name}: ${found.upgrades[i]} / ${found.maxValue} = ${penaltyPercentage}`
+				);
+				if (i === 0) {
+					actualValues.push({
+						stat: subStatValue.substat,
+						value: subStatValue.value * penaltyPercentage
+					});
+				} else {
+					const last = actualValues[actualValues.length - 1];
+					last.value += subStatValue.value * penaltyPercentage;
+				}
 			}
 		}
 
-		// calculate for potential value
-		if (stats.subStats.length < 4) {
+		// calculate for remaining stats potential value
+		if (stats.substats.length < 4) {
 			// since the substat values are already arranged in descending order,
 			// we just need to filter out the ones that are already included in the relic substats
 			// main stat is also excluded since if the stat is main stat, it cant be a potential substat
-			// optional chaining is used for accessing elements at index 0 because a character may only have 2 best stats
 			// and if the relic contains both of them, in this case, the filtered out array will be empty
 			potentialValues = subStatValues
 				.filter(
 					(subStatValue) =>
-						!stats.subStats.includes(subStatValue.substat) &&
-						stats.mainStat !== subStatValue.substat
+						!stats.substats.find((s) => s.name === subStatValue.substat) &&
+						stats.mainStat.name !== subStatValue.substat
 				)
 				.map((stat) => {
 					return {
@@ -266,9 +376,63 @@ export function rateRelic(
 	return {
 		setName: matchedSet.name,
 		image: matchedPiece.thumbnail,
+		level,
+		rarity,
 		relicName: matchedPiece.name,
 		type: matchedType.name,
 		...stats,
 		characters: matchedCharacters
 	};
+}
+
+function getStatNameFromLine(line: string, stat: Stat, flatStatsWithPercentageVariants: string[]) {
+	const result = {
+		name: '',
+		value: 0,
+		displayPercentage: true
+	};
+	// if a word in the line can be parsed into a number, then set it to this variable
+	// need to determine whether statname should include percentage or not
+	let foundValueString = '';
+
+	// find from last element split by space on which element can be successfully parsed to a float after removing the %
+	const split = line.split(' ');
+	for (let i = split.length - 1; i >= 0; i--) {
+		const word = split[i];
+
+		const parsed = Number.parseFloat(word.replace('%', ''));
+		if (isNaN(parsed)) continue;
+		// only include % to stat name if there is a flat stat equivalent for this name and this stat is a %
+		// eg.HP, ATK, and DEF, but not CRIT DMG since CRIT DMG does not have an equivalent that doesnt have the percentage
+		if (flatStatsWithPercentageVariants.includes(result.name) && word.endsWith('%'))
+			result.name += '%';
+
+		foundValueString = word;
+		result.value = parsed;
+		result.displayPercentage = stat.displayPercentage;
+		break;
+	}
+
+	// if the stat includes %, such as HP%, ATK%, and DEF%, check if the line has both the stat (HP) and the percentage
+	// other percentage stats (such as CRITs) is not included in this statment because they dont have the non-% variant
+	if (stat.name.includes('%')) {
+		if (line.includes(stat.name.replaceAll('%', '')) && line.includes('%')) {
+			result.name = stat.name;
+			result.displayPercentage = stat.displayPercentage;
+		}
+	} else if (line.includes(stat.name)) {
+		const isFlatStatAndWithoutPercentage =
+			flatStatsWithPercentageVariants.includes(stat.name) && !foundValueString.includes('%');
+		if (isFlatStatAndWithoutPercentage || !flatStatsWithPercentageVariants.includes(stat.name)) {
+			result.name = stat.name;
+			result.displayPercentage = stat.displayPercentage;
+		}
+	}
+
+	return result.name && result.value ? result : undefined;
+}
+
+// get flat stats by checking if all stats contain another element with this name but with a %
+function getFlatStatsWithPercentageVariants(allStats: string[]) {
+	return allStats.filter((s) => allStats.includes(s + '%'));
 }

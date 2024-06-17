@@ -69,7 +69,7 @@
 				relicData.push({
 					set: relic.set,
 					mainStat: relic.mainstat,
-					subStats,
+					substats: subStats,
 					type: relic.slot
 				});
 			}

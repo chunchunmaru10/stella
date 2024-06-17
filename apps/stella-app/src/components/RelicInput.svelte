@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { env } from '$env/dynamic/public';
 	import { settings } from '$lib/stores/settings';
 	import { toast } from '$lib/stores/toast';
 	import type { Relic } from '$lib/types';
@@ -73,53 +74,62 @@
 		const reader = new FileReader();
 
 		reader.onload = async function (e) {
-			if (!e.target?.result) return;
+			try {
+				if (!e.target?.result) return;
 
-			const imageData = e.target.result;
-			imagePreview = imageData.toString();
+				const imageData = e.target.result;
+				imagePreview = imageData.toString();
+				let processedImagePreview = imagePreview;
 
-			loading = true;
+				loading = true;
 
-			const processImageResponse = await fetch('/api/processImage', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(imageData)
-			});
-			const processImageResult = await processImageResponse.text();
+				if (env.PUBLIC_ENABLE_SHARP === 'true') {
+					const processImageResponse = await fetch('/api/processImage', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(imageData)
+					});
+					const processImageResult = await processImageResponse.text();
 
-			if (!processImageResponse.ok) {
-				toast.error(processImageResult);
-				data = undefined;
+					if (!processImageResponse.ok) {
+						toast.error(processImageResult);
+						data = undefined;
+						loading = false;
+						return;
+					}
+
+					processedImagePreview = `data:${file.type};base64,${processImageResult}`;
+				}
+
+				const worker = await createWorker();
+				const ret = await worker.recognize(processedImagePreview);
+				await worker.terminate();
+
+				let rawString = ret.data.text;
+
+				const rateRelicResponse = await fetch('/api/rateRelic', {
+					method: 'POST',
+					body: JSON.stringify({
+						rawString,
+						excludedCharacters: $settings.excludedCharacters
+					})
+				});
+
+				if (rateRelicResponse.ok) {
+					data = await rateRelicResponse.json();
+				} else {
+					const result = await rateRelicResponse.text();
+					toast.error(result);
+					data = undefined;
+				}
+
 				loading = false;
-				return;
+			} catch {
+				toast.error('An error occurred while recognizing the image..');
+				loading = false;
 			}
-
-			const worker = await createWorker();
-			const ret = await worker.recognize(`data:${file.type};base64,${processImageResult}`);
-			await worker.terminate();
-
-			let rawString = ret.data.text;
-
-			const rateRelicResponse = await fetch('/api/rateRelic', {
-				method: 'POST',
-				body: JSON.stringify({
-					rawString,
-					excludedCharacters: $settings.excludedCharacters
-				})
-			});
-
-			if (rateRelicResponse.ok) {
-				data = await rateRelicResponse.json();
-				console.log(data);
-			} else {
-				const result = await rateRelicResponse.text();
-				toast.error(result);
-				data = undefined;
-			}
-
-			loading = false;
 		};
 
 		reader.readAsDataURL(file);

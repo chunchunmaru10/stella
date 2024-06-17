@@ -27,7 +27,7 @@ export const POST = async ({ request }) => {
 						matchedType: matchedPiece.type,
 						stats: {
 							mainStat: relic.mainStat,
-							subStats: relic.subStats
+							subStats: relic.substats
 						}
 					},
 					characters

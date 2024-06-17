@@ -47,8 +47,20 @@ export const RelicSchema = z.object({
 	image: z.string(),
 	relicName: z.string(),
 	type: z.string(),
-	mainStat: z.string(),
-	subStats: z.array(z.string()),
+	level: z.number(),
+	rarity: z.number(),
+	mainStat: z.object({
+		name: z.string(),
+		value: z.number(),
+		displayPercentage: z.boolean()
+	}),
+	substats: z.array(
+		z.object({
+			name: z.string(),
+			value: z.number(),
+			displayPercentage: z.boolean()
+		})
+	),
 	characters: z.array(CharacterSchema)
 });
 

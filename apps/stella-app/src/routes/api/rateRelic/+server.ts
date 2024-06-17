@@ -5,9 +5,9 @@ export const POST = async ({ request }) => {
 		const { rawString, excludedCharacters }: { rawString: string; excludedCharacters: string[] } =
 			await request.json();
 
-		const { sets, subStatList, characters } = await getDbData();
+		const { sets, subStatList, characters, rarities } = await getDbData();
 
-		const relicData = getRelicData(rawString, sets, subStatList);
+		const relicData = getRelicData(rawString, sets, subStatList, rarities);
 
 		return new Response(
 			JSON.stringify(

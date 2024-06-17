@@ -86,7 +86,7 @@
 					for (const [stat] of selectedSubstats) {
 						// loop through the substat that the relic has, if even one of the selected does not include in the list,
 						// means this relic does not fulfill the requirement, if then, can return early
-						if (!relic.subStats.includes(stat)) return false;
+						if (!relic.substats.includes(stat)) return false;
 					}
 				}
 

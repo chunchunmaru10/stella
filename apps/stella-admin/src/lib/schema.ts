@@ -85,6 +85,7 @@ export const statSchema = z.object({
     .min(1, "Thumbnail is required")
     .url("Invalid thumbnail URL"),
   sortOrder: z.number(),
+  showPercentage: z.boolean(),
   mainStatScalings: z.object({
     canBeMainStat: z.boolean(),
     scalings: z.array(

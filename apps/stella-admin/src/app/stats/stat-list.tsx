@@ -64,6 +64,11 @@ export default function StatList({
               return (
                 bigger.subStatScalings.length - smaller.subStatScalings.length
               );
+            case "Show Percentage":
+              return (
+                Number(bigger.displayPercentage) -
+                Number(smaller.displayPercentage)
+              );
             default:
               return smaller.sortOrder - bigger.sortOrder;
           }
@@ -111,7 +116,12 @@ export default function StatList({
               sortBy={sortBy}
               setSortBy={setSortBy}
             />
-            {["Can Be Main Stat", "Can Be Substat", "Sort Order"].map((th) => (
+            {[
+              "Can Be Main Stat",
+              "Can Be Substat",
+              "Show Percentage",
+              "Sort Order",
+            ].map((th) => (
               <SortableTableHead
                 key={th}
                 className="min-w-44"
@@ -162,6 +172,9 @@ export default function StatList({
                   </TableCell>
                   <TableCell>
                     {stat.subStatScalings.length > 0 ? <Check /> : <X />}
+                  </TableCell>
+                  <TableCell>
+                    {stat.displayPercentage ? <Check /> : <X />}
                   </TableCell>
                   <TableCell>{stat.sortOrder}</TableCell>
                 </TableRow>
