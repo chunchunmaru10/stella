@@ -2,15 +2,50 @@
 	import type { Relic } from '$lib/types';
 
 	export let data: Relic;
+
+	const relicColor = getRelicBackground();
+
+	function getRelicBackground() {
+		switch (data.rarity) {
+			case 2:
+				return {
+					from: 'from-green-dark',
+					to: 'to-green-light',
+					text: 'text-green-light',
+					bg: 'bg-green-light'
+				};
+			case 3:
+				return {
+					from: 'from-blue-dark',
+					to: 'to-blue-light',
+					text: 'text-blue-light',
+					bg: 'bg-blue-light'
+				};
+			case 4:
+				return {
+					from: 'from-purple-dark',
+					to: 'to-purple-light',
+					text: 'text-purple-light',
+					bg: 'bg-purple-light'
+				};
+			default:
+				return {
+					from: 'from-gold-dark',
+					to: 'to-gold-light',
+					text: 'text-gold-light',
+					bg: 'bg-gold-light'
+				};
+		}
+	}
 </script>
 
 <div class="font-[DIN]">
-	<h2 class="text-gold-light w-full min-w-0 truncate text-2xl">
+	<h2 class={`${relicColor.text} w-full min-w-0 truncate text-2xl`}>
 		{data.relicName}
 	</h2>
-	<div class="bg-gold-light mt-1 h-1 min-w-full rounded-full" />
+	<div class={`${relicColor.bg} mt-1 h-1 min-w-full rounded-full`} />
 	<div
-		class="from-gold-dark to-gold-light mt-4 flex aspect-[21/9] w-full items-end rounded-md bg-gradient-to-br p-4"
+		class={`${relicColor.from} ${relicColor.to} mt-4 flex aspect-[21/9] w-full items-end rounded-md bg-gradient-to-br p-4`}
 	>
 		<h3 class="text-2xl text-white/80">{data.type}</h3>
 		<div class="relative h-full max-h-full w-full">

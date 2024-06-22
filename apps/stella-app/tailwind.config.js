@@ -33,6 +33,14 @@ export default {
 				purple: {
 					light: '#9c65d7',
 					dark: '#3f4064'
+				},
+				blue: {
+					light: '#5882be',
+					dark: '#3d5892'
+				},
+				green: {
+					light: '#4a8e8e',
+					dark: '#4b6379'
 				}
 			}
 		}

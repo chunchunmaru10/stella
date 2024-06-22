@@ -322,16 +322,12 @@ export function rateRelic(
 
 			if (!found) continue;
 
-			console.log(found.name + ': ' + found.upgrades);
 			for (let i = 0; i < found.upgrades.length; i++) {
 				const penaltyPercentage = found.upgrades[i] / found.maxValue;
-				console.log(
-					`${found.name}: ${found.upgrades[i]} / ${found.maxValue} = ${penaltyPercentage}`
-				);
 				if (i === 0) {
 					actualValues.push({
 						stat: subStatValue.substat,
-						value: subStatValue.value * penaltyPercentage
+						value: Math.round(subStatValue.value * penaltyPercentage * 10) / 10
 					});
 				} else {
 					const last = actualValues[actualValues.length - 1];
