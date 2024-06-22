@@ -52,15 +52,15 @@ export const RelicSchema = z.object({
 	mainStat: z.object({
 		name: z.string(),
 		value: z.number(),
-		displayPercentage: z.boolean(),
-		upgrades: z.array(z.number()),
-		maxValue: z.number()
+		displayPercentage: z.boolean()
 	}),
 	substats: z.array(
 		z.object({
 			name: z.string(),
 			value: z.number(),
-			displayPercentage: z.boolean()
+			displayPercentage: z.boolean(),
+			upgrades: z.array(z.number()),
+			maxValue: z.number()
 		})
 	),
 	characters: z.array(CharacterSchema)

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { Relic } from '$lib/types';
+	import { Tooltip } from 'flowbite-svelte';
+	import { string } from 'zod';
 
 	export let data: Relic;
 
@@ -63,7 +65,7 @@
 			{data.mainStat.name.replace('%', '')}
 		</span>
 		<span>
-			{data.mainStat.displayPercentage ? data.mainStat.value + '%' : data.mainStat.value}
+			{data.mainStat.displayPercentage ? data.mainStat.value.toFixed(1) + '%' : data.mainStat.value}
 		</span>
 	</h3>
 	{#each data.substats as substat, i}
@@ -73,9 +75,10 @@
 			<span>
 				{substat.name}
 			</span>
-			<span>
+			<span id={substat.name}>
 				{substat.displayPercentage ? substat.value + '%' : substat.value}
 			</span>
+			<Tooltip>{substat.upgrades.join(', ')}</Tooltip>
 		</h3>
 	{/each}
 	<h3 class="text-gold-medium mt-4 text-2xl">
