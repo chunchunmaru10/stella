@@ -32,6 +32,7 @@
 
 	$: {
 		if (batchRelics.length && browser) {
+			loading = true;
 			try {
 				const compressed = lz.compress(JSON.stringify(batchRelics));
 				localStorage.setItem('batchRelics', compressed);
@@ -41,6 +42,7 @@
 					4000
 				);
 			}
+			loading = false;
 		}
 	}
 
@@ -116,7 +118,7 @@
 				<Hr hrClass="lg:hidden border-primary-500 bg-primary-500" />
 				<div class="hidden w-4 lg:block" />
 				<div
-					class="right-0 top-0 h-full max-h-full w-full max-w-full overflow-y-auto py-2 pr-2 scrollbar-thin lg:absolute lg:w-96"
+					class="scrollbar-thin right-0 top-0 h-full max-h-full w-full max-w-full overflow-y-auto py-2 pr-2 lg:absolute lg:w-96"
 				>
 					<CharacterList characters={activeRelic.characters} />
 				</div>

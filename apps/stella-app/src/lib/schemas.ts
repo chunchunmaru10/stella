@@ -31,13 +31,13 @@ export const CharacterSchema = z.object({
 	actualValues: z.array(
 		z.object({
 			stat: z.string(),
-			value: z.number().min(1)
+			value: z.number()
 		})
 	),
 	potentialValues: z.array(
 		z.object({
 			stat: z.string(),
-			value: z.number().min(1)
+			value: z.number()
 		})
 	)
 });

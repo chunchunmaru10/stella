@@ -116,7 +116,7 @@ export function getStatsFromRawString(
 export function getRelicData(
 	rawString: string,
 	sets: Awaited<ReturnType<typeof getDbData>>['sets'],
-	subStatList: Awaited<ReturnType<typeof getDbData>>['subStatList'],
+	substatList: Awaited<ReturnType<typeof getDbData>>['subStatList'],
 	rarities: Awaited<ReturnType<typeof getDbData>>['rarities']
 ) {
 	let matchedSet: (typeof sets)[number] | undefined;
@@ -140,7 +140,7 @@ export function getRelicData(
 		// temporary remove line breaks because some relic set names may be too long
 		if (piece && removeSpace(rawString).includes(removeSpace(piece.name)) && piece.type?.name) {
 			matchedPiece = piece;
-			stats = getStatsFromRawString(rawString, piece.type.stats, subStatList);
+			stats = getStatsFromRawString(rawString, piece.type.stats, substatList);
 		}
 	}
 
@@ -151,7 +151,6 @@ export function getRelicData(
 	if (!stats) throw new Error('No stats found');
 
 	// determine level
-	// const topMaxLevel = Math.max(...rarities.map((r) => r.maxLevel)); // find the absolute max level of a relic (because different rarities have different max level)
 	const possibleLevels: {
 		rarity: number;
 		level: number;
@@ -184,28 +183,7 @@ export function getRelicData(
 	for (const { level, rarity } of possibleLevels) {
 		// loop through each substat to see if it matches
 		const numberOfUpgrades = Math.floor(level / 3); // each substats can be upgraded once every 3 levels
-		for (const substat of stats.substats) {
-			const matchingSubstatScalingsAtThisRarity = subStatList
-				.find((s) => s.name === substat.name)
-				?.subStatScalings.filter((s) => s.rarityId === rarity);
-
-			if (!matchingSubstatScalingsAtThisRarity)
-				throw new Error('Could not determine substat value distribution');
-
-			// get max value to be used later to determine the rating penalty
-			substat.maxValue = matchingSubstatScalingsAtThisRarity.reduce(
-				(prev, curr) => Math.max(prev, curr.scalingValue),
-				0
-			);
-
-			const combo = findCombination(
-				matchingSubstatScalingsAtThisRarity.map((s) => s.scalingValue),
-				substat.value,
-				substat.displayPercentage
-			);
-
-			if (combo) substat.upgrades = combo;
-		}
+		for (const substat of stats.substats) getSubstatUpgrades(substat, substatList, rarity);
 
 		// verify that the upgrades count match
 		const calculatedUpgradeCount = stats.substats.reduce((prev, curr) => {
@@ -327,7 +305,7 @@ export function rateRelic(
 				if (i === 0) {
 					actualValues.push({
 						stat: subStatValue.substat,
-						value: Math.round(subStatValue.value * penaltyPercentage * 10) / 10
+						value: subStatValue.value * penaltyPercentage
 					});
 				} else {
 					const last = actualValues[actualValues.length - 1];
@@ -381,6 +359,39 @@ export function rateRelic(
 	};
 }
 
+// get flat stats by checking if all stats contain another element with this name but with a %
+export function getFlatStatsWithPercentageVariants(allStats: string[]) {
+	return allStats.filter((s) => allStats.includes(s + '%'));
+}
+
+// no need to return, this will directly modify the object since it is passed by reference
+export function getSubstatUpgrades(
+	substat: ReturnType<typeof getStatsFromRawString>['substats'][number],
+	substatList: Awaited<ReturnType<typeof getDbData>>['subStatList'],
+	rarity: number
+) {
+	const matchingSubstatScalingsAtThisRarity = substatList
+		.find((s) => s.name === substat.name)
+		?.subStatScalings.filter((s) => s.rarityId === rarity);
+
+	if (!matchingSubstatScalingsAtThisRarity)
+		throw new Error('Could not determine substat value distribution');
+
+	// get max value to be used later to determine the rating penalty
+	substat.maxValue = matchingSubstatScalingsAtThisRarity.reduce(
+		(prev, curr) => Math.max(prev, curr.scalingValue),
+		0
+	);
+
+	const combo = findCombination(
+		matchingSubstatScalingsAtThisRarity.map((s) => s.scalingValue),
+		substat.value,
+		substat.displayPercentage
+	);
+
+	if (combo) substat.upgrades = combo;
+}
+
 function getStatNameFromLine(line: string, stat: Stat, flatStatsWithPercentageVariants: string[]) {
 	const result = {
 		name: '',
@@ -426,9 +437,4 @@ function getStatNameFromLine(line: string, stat: Stat, flatStatsWithPercentageVa
 	}
 
 	return result.name && result.value ? result : undefined;
-}
-
-// get flat stats by checking if all stats contain another element with this name but with a %
-function getFlatStatsWithPercentageVariants(allStats: string[]) {
-	return allStats.filter((s) => allStats.includes(s + '%'));
 }

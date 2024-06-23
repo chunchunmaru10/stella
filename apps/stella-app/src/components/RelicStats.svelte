@@ -65,7 +65,9 @@
 			{data.mainStat.name.replace('%', '')}
 		</span>
 		<span>
-			{data.mainStat.displayPercentage ? data.mainStat.value.toFixed(1) + '%' : data.mainStat.value}
+			{data.mainStat.displayPercentage
+				? data.mainStat.value.toFixed(1) + '%'
+				: Math.floor(data.mainStat.value)}
 		</span>
 	</h3>
 	{#each data.substats as substat, i}
@@ -78,7 +80,7 @@
 			<span id={substat.name}>
 				{substat.displayPercentage ? substat.value + '%' : substat.value}
 			</span>
-			<Tooltip>{substat.upgrades.join(', ')}</Tooltip>
+			<Tooltip class="z-50">{substat.upgrades.join(', ')}</Tooltip>
 		</h3>
 	{/each}
 	<h3 class="text-gold-medium mt-4 text-2xl">

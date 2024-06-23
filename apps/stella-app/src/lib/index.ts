@@ -76,6 +76,10 @@ export function findCombination(
 	return backtrack(0, 0, []);
 }
 
+export function fixFloatPrecision(n: number) {
+	return Math.round(n * 10) / 10;
+}
+
 export function getUsableCharactersFromRelic(relic: Relic, settings: Settings) {
 	return {
 		...relic,

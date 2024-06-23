@@ -2,6 +2,7 @@
 	import type { CharacterRelicValue } from '$lib/types';
 	import CharacterRating from './CharacterRating.svelte';
 	import { settings } from '$lib/stores/settings';
+	import { fixFloatPrecision } from '$lib';
 
 	export let characters: CharacterRelicValue[];
 
@@ -25,7 +26,7 @@
 				return {
 					...character,
 					releaseDate: new Date(character.releaseDate),
-					rating
+					rating: fixFloatPrecision(rating)
 				};
 			})
 			.filter((c) => {

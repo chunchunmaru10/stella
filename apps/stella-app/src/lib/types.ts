@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import type { CharacterSchema, HsrScannerJsonSchema, RelicSchema } from './schemas';
+import type { CharacterSchema, RelicSchema } from './schemas';
 
 // https://stackoverflow.com/questions/59774572/how-to-get-the-return-type-of-async-function-in-typescript
 export type AsyncReturnType<T extends (...args: never) => Promise<unknown>> = T extends (
@@ -27,8 +27,6 @@ export type Settings = {
 	includeUnreleaseCharacters: boolean;
 };
 
-export type HsrScannerJson = z.infer<typeof HsrScannerJsonSchema>;
-
-export type HsrScannerRelic = HsrScannerJson['relics'];
-
 export type SortOption = 'Piece Type' | 'Set' | 'Character Count';
+
+export type BatchImportOption = 'HSR Scanner' | 'Stella';

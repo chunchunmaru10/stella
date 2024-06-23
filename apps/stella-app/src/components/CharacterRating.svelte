@@ -3,6 +3,7 @@
 	import { Badge } from 'flowbite-svelte';
 	import ProgressBar from './common/ProgressBar.svelte';
 	import { settings } from '$lib/stores/settings';
+	import { fixFloatPrecision } from '$lib';
 
 	export let character: CharacterRelicValue & {
 		rating: number;
@@ -10,7 +11,7 @@
 
 	function formatValue(value: number) {
 		return $settings.ratingsFormat === 'fraction'
-			? value.toString()
+			? fixFloatPrecision(value)
 			: Math.round((value / character.maxPotentialValue) * 100) + '%';
 	}
 
@@ -23,7 +24,7 @@
 		progress = (character.rating / character.maxPotentialValue) * 100;
 		label =
 			$settings.ratingsFormat === 'fraction'
-				? `${character.rating}/${character.maxPotentialValue}`
+				? `${fixFloatPrecision(character.rating)}/${fixFloatPrecision(character.maxPotentialValue)}`
 				: Math.round(progress) + '%';
 	}
 </script>

@@ -1,41 +1,27 @@
-import { getDbData } from '$lib/server/index.js';
-import type { Relic, RelicData } from '$lib/types.js';
-import { rateRelic } from '$lib/server/index.js';
+import type { BatchImportOption, Relic } from '$lib/types.js';
+import { hsrScannerBatch, stellaBatch } from '$lib/server/batchImportHandler.js';
 
 export const POST = async ({ request }) => {
 	try {
-		const { sets, characters } = await getDbData();
+		const req: {
+			importType: BatchImportOption;
+			jsonData: string;
+		} = await request.json();
 
-		const relicData: RelicData[] = await request.json();
+		let result: Relic[] = [];
 
-		const relics: Relic[] = [];
-
-		for (const relic of relicData) {
-			const matchedSet = sets.find((set) => set.name === relic.set);
-
-			if (!matchedSet) continue;
-
-			const matchedPiece = matchedSet.pieces.find((piece) => piece.type?.name === relic.type);
-
-			if (!matchedPiece) continue;
-
-			relics.push(
-				rateRelic(
-					{
-						matchedSet,
-						matchedPiece,
-						matchedType: matchedPiece.type,
-						stats: {
-							mainStat: relic.mainStat,
-							subStats: relic.substats
-						}
-					},
-					characters
-				)
-			);
+		switch (req.importType) {
+			case 'Stella':
+				result = await stellaBatch(req.jsonData);
+				break;
+			case 'HSR Scanner':
+				result = await hsrScannerBatch(req.jsonData);
+				break;
+			default:
+				throw new Error('Invalid import type');
 		}
 
-		return new Response(JSON.stringify(relics));
+		return new Response(JSON.stringify(result));
 	} catch (e: unknown) {
 		let message = '';
 
