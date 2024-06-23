@@ -80,13 +80,13 @@
 					shouldExclude = true;
 				else if (selectedRelicTypes.size > 0 && !selectedRelicTypes.get(relic.type))
 					shouldExclude = true;
-				else if (selectedMainStats.size > 0 && !selectedMainStats.get(relic.mainStat))
+				else if (selectedMainStats.size > 0 && !selectedMainStats.get(relic.mainStat.name))
 					shouldExclude = true;
 				else if (selectedSubstats.size > 0) {
 					for (const [stat] of selectedSubstats) {
 						// loop through the substat that the relic has, if even one of the selected does not include in the list,
 						// means this relic does not fulfill the requirement, if then, can return early
-						if (!relic.substats.includes(stat)) return false;
+						if (!relic.substats.find((s) => s.name === stat)) return false;
 					}
 				}
 
@@ -147,7 +147,7 @@
 				.filter((r) => r.canBeSubstats)
 				.sort((a, b) => a.sortOrder - b.sortOrder)
 				.reduce((acc, stat) => acc.set(stat.name, stat.thumbnail), new Map())}
-			<div class="mt-4 h-[100vh] max-h-full overflow-y-auto scrollbar-thin">
+			<div class="scrollbar-thin mt-4 h-[100vh] max-h-full overflow-y-auto">
 				<div class="mr-2">
 					<FilterRelicSet relicSets={relicSetsMap} bind:selectedRelicSets />
 					<FilterRelicType relicTypes={relicTypesMap} bind:selectedRelicTypes />

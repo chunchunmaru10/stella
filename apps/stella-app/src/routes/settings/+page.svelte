@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import CharacterToggleSettings from '../../components/CharacterToggleSettings.svelte';
 	import PreferencesSettings from '../../components/PreferencesSettings.svelte';
 
@@ -46,7 +46,7 @@
 			{#if activeTabIndex === index}
 				<div
 					bind:this={tabUnderline}
-					class="absolute bottom-0 left-0 h-1 w-full rounded-full bg-gold-medium"
+					class="bg-gold-medium absolute bottom-0 left-0 h-1 w-full rounded-full"
 				/>
 			{/if}
 		</li>
