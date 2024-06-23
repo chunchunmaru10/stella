@@ -33,16 +33,17 @@
 	$: {
 		if (batchRelics.length && browser) {
 			loading = true;
-			try {
-				const compressed = lz.compress(JSON.stringify(batchRelics));
-				localStorage.setItem('batchRelics', compressed);
-			} catch (e) {
-				toast.info(
-					'Too many relics, unable to store in browser storage. You may export to save the data instead.',
-					4000
-				);
-			}
-			loading = false;
+			compress(JSON.stringify(batchRelics))
+				.then((output) => {
+					localStorage.setItem('batchRelics', output);
+				})
+				.catch(() => {
+					toast.info(
+						'Too many relics, unable to store in browser storage. You may export to save the data instead.',
+						4000
+					);
+				})
+				.finally(() => (loading = false));
 		}
 	}
 
@@ -51,18 +52,46 @@
 	}
 
 	onMount(() => {
+		loading = true;
 		const localStorageItem = localStorage.getItem('batchRelics');
-		const rawJson = localStorageItem !== null ? JSON.parse(lz.decompress(localStorageItem)) : null;
-
-		const res = BatchRelicSchema.safeParse(rawJson);
-		if (res.success) {
-			batchRelics = res.data;
-		} else {
-			localStorage.removeItem('batchRelics');
-		}
-
-		loading = false;
+		decompress(localStorageItem ?? '')
+			.then((output) => {
+				const rawJson = JSON.parse(output);
+				const res = BatchRelicSchema.safeParse(rawJson);
+				if (res.success) {
+					batchRelics = res.data;
+				} else {
+					localStorage.removeItem('batchRelics');
+				}
+			})
+			.finally(() => (loading = false));
 	});
+
+	async function compress(input: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				try {
+					const result = lz.compress(input);
+					resolve(result);
+				} catch (error) {
+					reject(error);
+				}
+			}, 0); // Use 0ms timeout to simulate asynchronous behavior
+		});
+	}
+
+	async function decompress(input: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				try {
+					const result = lz.decompress(input);
+					resolve(result);
+				} catch (error) {
+					reject(error);
+				}
+			}, 0); // Use 0ms timeout to simulate asynchronous behavior
+		});
+	}
 
 	function mapBatchRelicWithCharacter(batchRelic: Relic[]) {
 		return batchRelic.map((r) => getUsableCharactersFromRelic(r, $settings));
