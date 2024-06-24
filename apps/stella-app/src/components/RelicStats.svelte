@@ -1,43 +1,12 @@
 <script lang="ts">
+	import { getRelicColor } from '$lib';
 	import type { Relic } from '$lib/types';
 	import Tooltip from './common/Tooltip.svelte';
 
 	export let data: Relic;
+	let relicColor: ReturnType<typeof getRelicColor>;
 
-	const relicColor = getRelicBackground();
-
-	function getRelicBackground() {
-		switch (data.rarity) {
-			case 2:
-				return {
-					from: 'from-green-dark',
-					to: 'to-green-light',
-					text: 'text-green-light',
-					bg: 'bg-green-light'
-				};
-			case 3:
-				return {
-					from: 'from-blue-dark',
-					to: 'to-blue-light',
-					text: 'text-blue-light',
-					bg: 'bg-blue-light'
-				};
-			case 4:
-				return {
-					from: 'from-purple-dark',
-					to: 'to-purple-light',
-					text: 'text-purple-light',
-					bg: 'bg-purple-light'
-				};
-			default:
-				return {
-					from: 'from-gold-dark',
-					to: 'to-gold-light',
-					text: 'text-gold-light',
-					bg: 'bg-gold-light'
-				};
-		}
-	}
+	$: relicColor = getRelicColor(data.rarity);
 </script>
 
 <div class="font-[DIN]">
@@ -50,7 +19,12 @@
 	<div
 		class={`${relicColor.from} ${relicColor.to} mt-4 flex aspect-[21/9] w-full items-end rounded-md bg-gradient-to-br p-4`}
 	>
-		<h3 class="text-2xl text-white/80">{data.type}</h3>
+		<div class="flex flex-col">
+			<h3 class="text-nowrap text-xl text-white/80">{data.type}</h3>
+			<div class="flex items-center gap-1 text-3xl text-white">
+				<span>+</span>{data.level}
+			</div>
+		</div>
 		<div class="relative h-full max-h-full w-full">
 			<img
 				src={data.image}

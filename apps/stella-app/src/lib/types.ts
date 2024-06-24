@@ -27,6 +27,6 @@ export type Settings = {
 	includeUnreleaseCharacters: boolean;
 };
 
-export type SortOption = 'Piece Type' | 'Set' | 'Character Count';
+export type SortOption = 'Piece Type' | 'Set' | 'Character Count' | 'Rarity' | 'Level';
 
 export type BatchImportOption = 'HSR Scanner' | 'Stella';

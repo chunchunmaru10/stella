@@ -110,3 +110,36 @@ export function getUsableCharactersFromRelic(relic: Relic, settings: Settings) {
 			})
 	};
 }
+
+export function getRelicColor(rarity: number) {
+	switch (rarity) {
+		case 2:
+			return {
+				from: 'from-green-dark',
+				to: 'to-green-light',
+				text: 'text-green-light',
+				bg: 'bg-green-light'
+			};
+		case 3:
+			return {
+				from: 'from-blue-dark',
+				to: 'to-blue-light',
+				text: 'text-blue-light',
+				bg: 'bg-blue-light'
+			};
+		case 4:
+			return {
+				from: 'from-purple-dark',
+				to: 'to-purple-light',
+				text: 'text-purple-light',
+				bg: 'bg-purple-light'
+			};
+		default:
+			return {
+				from: 'from-gold-dark',
+				to: 'to-gold-light',
+				text: 'text-gold-light',
+				bg: 'bg-gold-light'
+			};
+	}
+}

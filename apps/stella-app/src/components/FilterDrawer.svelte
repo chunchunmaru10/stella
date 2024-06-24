@@ -31,7 +31,7 @@
 	let selectedSubstats: Map<string, string> = new Map();
 	let relicTypesData: Awaited<(typeof filterData)['relicTypes']>;
 
-	const allSortOptions: SortOption[] = ['Piece Type', 'Set', 'Character Count'];
+	const allSortOptions: SortOption[] = ['Piece Type', 'Set', 'Character Count', 'Level', 'Rarity'];
 	let sortOrder: 'asc' | 'desc' = 'desc';
 	let selectedSortOptions: SortOption[] = [];
 	const sortFunctions: {
@@ -43,7 +43,9 @@
 			const bSortOrder = relicTypesData.find((t) => t.name === b.type)?.sortOrder ?? 0;
 			return aSortOrder - bSortOrder;
 		},
-		Set: (a, b) => a.setName.localeCompare(b.setName)
+		Set: (a, b) => a.setName.localeCompare(b.setName),
+		Level: (a, b) => a.level - b.level,
+		Rarity: (a, b) => a.rarity - b.rarity
 	};
 
 	async function loadStreamedData() {
