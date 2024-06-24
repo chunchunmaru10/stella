@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Relic } from '$lib/types';
-	import { Tooltip } from 'flowbite-svelte';
-	import { string } from 'zod';
+	import Tooltip from './common/Tooltip.svelte';
 
 	export let data: Relic;
 
@@ -42,6 +41,8 @@
 </script>
 
 <div class="font-[DIN]">
+	<!-- Place a button here to redirect auto focus to this element when modal open in batch import otherwise the tooltip will show-->
+	<button class="hidden" />
 	<h2 class={`${relicColor.text} w-full min-w-0 truncate text-2xl`}>
 		{data.relicName}
 	</h2>
@@ -77,10 +78,15 @@
 			<span>
 				{substat.name}
 			</span>
-			<span id={substat.name}>
-				{substat.displayPercentage ? substat.value + '%' : substat.value}
-			</span>
-			<Tooltip class="z-50">{substat.upgrades.join(', ')}</Tooltip>
+			<Tooltip
+				options={{
+					content: substat.upgrades.join(',')
+				}}
+			>
+				<span>
+					{substat.displayPercentage ? substat.value + '%' : substat.value}
+				</span>
+			</Tooltip>
 		</h3>
 	{/each}
 	<h3 class="text-gold-medium mt-4 text-2xl">

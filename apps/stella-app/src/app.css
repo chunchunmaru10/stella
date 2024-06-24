@@ -8,6 +8,26 @@
 	--main-height: calc(100svh - 7rem - 2rem);
 }
 
+.tippy-box {
+	@apply rounded-lg bg-gray-900 text-sm font-medium text-white shadow-md dark:bg-gray-700;
+}
+
+.tippy-box[data-placement^='top'] > .tippy-arrow::before {
+	@apply border-t-gray-700;
+}
+
+.tippy-box[data-placement^='bottom'] > .tippy-arrow::before {
+	@apply border-b-gray-700;
+}
+
+.tippy-box[data-placement^='left'] > .tippy-arrow::before {
+	@apply border-l-gray-700;
+}
+
+.tippy-box[data-placement^='right'] > .tippy-arrow::before {
+	@apply border-r-gray-700;
+}
+
 @layer base {
 	@font-face {
 		font-family: DIN;

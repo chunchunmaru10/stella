@@ -9,7 +9,7 @@
 
 <div class="rounded-md transition hover:scale-110">
 	<button
-		class="relative rounded-md bg-gradient-to-br from-gold-dark to-gold-light p-1 outline-none"
+		class="from-gold-dark to-gold-light relative rounded-md bg-gradient-to-br p-1 outline-none"
 		on:click={() => {
 			activeRelic = relic;
 			dialog?.open();

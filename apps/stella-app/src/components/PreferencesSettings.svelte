@@ -2,8 +2,8 @@
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
 	import Icon from '@iconify/svelte';
-	import { Tooltip } from 'flowbite-svelte';
 	import Listbox from './common/Listbox.svelte';
+	import Tooltip from './common/Tooltip.svelte';
 
 	let minRatingPercentage = $settings.minRatingPercentage;
 	let useRatingValue = $settings.relicRatings;
@@ -31,39 +31,46 @@
 		<h2 class="mb-1 text-xl font-semibold">
 			Minimum Rating Percentage ({$settings.minRatingPercentage}%)
 		</h2>
-		<div
-			class="flex min-h-[20px] min-w-[20px] cursor-pointer items-center justify-center rounded-full bg-primary-500"
-			role="tooltip"
+		<Tooltip
+			options={{
+				content: 'Only relics rated above this percentage will be displayed'
+			}}
 		>
-			<span class="inline-flex min-h-[20px] min-w-[20px] items-center justify-center">
-				<Icon icon="fa6-solid:info" width={12} height={12} />
-			</span>
-			<Tooltip>Only relics rated above this percentage will be displayed</Tooltip>
-		</div>
+			<div
+				class="bg-primary-500 flex min-h-[20px] min-w-[20px] cursor-pointer items-center justify-center rounded-full"
+				role="tooltip"
+			>
+				<span class="inline-flex min-h-[20px] min-w-[20px] items-center justify-center">
+					<Icon icon="fa6-solid:info" width={12} height={12} />
+				</span>
+			</div>
+		</Tooltip>
 	</div>
 	<input
 		type="range"
 		min="1"
 		max="100"
 		bind:value={minRatingPercentage}
-		class="mt-5 h-2 w-full appearance-none rounded-full dark:bg-gray-700 md:w-1/2"
+		class="mt-5 h-2 w-full appearance-none rounded-full md:w-1/2 dark:bg-gray-700"
 	/>
 	<!-- Use Rating Value -->
 	<div class="mt-6 flex items-center gap-4">
 		<h2 class="mb-1 text-xl font-semibold">Use Rating Value</h2>
-		<div
-			class="flex cursor-pointer items-center justify-center rounded-full bg-primary-500"
-			role="tooltip"
+		<Tooltip
+			options={{
+				content:
+					'If "Potential Value" is picked and there are only 3 known substats in the relic, the calculator will take into account the max potential value of the relic (i.e., it assumes that the 4th substat will always be the best leftover substat).'
+			}}
 		>
-			<span class="inline-flex min-h-[20px] min-w-[20px] items-center justify-center">
-				<Icon icon="fa6-solid:info" width={12} height={12} />
-			</span>
-			<Tooltip class="max-w-52">
-				If &quot;Potential Value&quot; is picked and there are only 3 known substats in the relic,
-				the calculator will take into account the max potential value of the relic (i.e., it assumes
-				that the 4th substat will always be the best leftover substat).
-			</Tooltip>
-		</div>
+			<div
+				class="bg-primary-500 flex cursor-pointer items-center justify-center rounded-full"
+				role="tooltip"
+			>
+				<span class="inline-flex min-h-[20px] min-w-[20px] items-center justify-center">
+					<Icon icon="fa6-solid:info" width={12} height={12} />
+				</span>
+			</div></Tooltip
+		>
 	</div>
 	<Listbox
 		options={[
