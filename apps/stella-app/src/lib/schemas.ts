@@ -67,3 +67,8 @@ export const RelicSchema = z.object({
 });
 
 export const BatchRelicSchema = z.array(RelicSchema);
+
+export const AnnouncementSchema = z.object({
+	message: z.string(),
+	doNotShow: z.boolean()
+});

@@ -1,3 +1,4 @@
+import { announcementRouter } from "./routers/announcement";
 import { characterRouter } from "./routers/character";
 import { rarityRouter } from "./routers/rarity";
 import { setRouter } from "./routers/set";
@@ -11,6 +12,7 @@ export const appRouter = router({
   type: typeRouter,
   stat: statRouter,
   rarity: rarityRouter,
+  announcement: announcementRouter,
 });
 
 export type AppRouter = typeof appRouter;

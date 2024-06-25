@@ -24,6 +24,10 @@ export default function Sidenav() {
       href: "/rarities",
       text: "Rarities",
     },
+    {
+      href: "/announcements",
+      text: "Announcements",
+    },
   ];
 
   return (

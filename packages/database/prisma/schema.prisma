@@ -103,3 +103,8 @@ model SubstatScaling {
 
   @@id([statName, rarityId, scalingValue])
 }
+
+model Announcement {
+  message   String   @id
+  createdAt DateTime @default(now())
+}
