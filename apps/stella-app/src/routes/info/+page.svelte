@@ -5,11 +5,12 @@
 	let imageDescription = '';
 </script>
 
-<section class="prose min-w-full pb-8 dark:prose-invert prose-h2:mt-6 prose-img:rounded-lg">
+<section class="prose dark:prose-invert prose-h2:mt-6 prose-img:rounded-lg min-w-full pb-8">
 	<h1 class="mb-0 text-3xl font-bold">Info</h1>
 	<p>
 		Stella is a Honkai: Star Rail relic rating tool that helps players to decide whether a relic is
-		worth upgrading or should be salvaged.
+		worth upgrading/keeping or should be salvaged. It is meant to be as generic as possible without
+		doing any damage calculations.
 	</p>
 
 	<Hr />
@@ -26,6 +27,11 @@
 		<li>The name of the relic piece to determine the piece type</li>
 		<li>Based on the piece type, the main stat available for that piece</li>
 		<li>Substats that are lines below the main stat</li>
+		<li>Depending on the value of the main stat, determine the possible rarities</li>
+		<li>
+			For each possible rarity, check if the upgrade combinations match the substat's value until a
+			match is found
+		</li>
 	</ol>
 
 	<p>
@@ -67,11 +73,15 @@
 		characters in Settings.)
 	</p>
 	<p>
-		Stella categorizes substats into 5 different tiers, from best to fifth best, and each tier is
-		assigned a point, 5 points for best, 4 points for second best, and so on. There can be multiple
-		substats in the same tier. All points are then tallied up and divided with the
-		<b> maximum potential rating </b> of this piece.
+		Stella categorizes substats into <i>n</i> tiers, where <i>n</i> is the number of different
+		levels of substats that are suitable for a character. For example, if a character substats
+		recommendation is SPD &gt; CRIT DMG = CRIT Rate &lt; ATK%, then <i>n</i> would be 3, since there
+		are 3 levels of substats recommended. Each tier is then assigned points according to how good
+		they are with <i>n</i> being the max point. Using the previous example, SPD would be given 3 points,
+		CRIT DMG and CRIT Rate would be given 2 points, and ATK% would be given 1 point. This is before taking
+		into account any substat upgrades the relic might have.
 	</p>
+	<p></p>
 	<p>
 		Maximum potential rating is a rating that assumes the best possible substat combination a relic
 		piece can get with regards to the character that is using it, and the main stat that it has. If
@@ -92,8 +102,9 @@
 			rated the same. (But Relic D will not be rated)
 		</li>
 		<li>
-			Breakpoints. Stella will disregard breakpoints and always assign points to the substats as is,
-			even if the substats may have went over the breakpoint listed in Pyrdwen.
+			Breakpoints. Since Stella does not have any idea on how your character is built, it will
+			disregard breakpoints and always assign points to the substats as is, even if the substats may
+			have went over the breakpoint listed in Pyrdwen.
 		</li>
 	</ul>
 

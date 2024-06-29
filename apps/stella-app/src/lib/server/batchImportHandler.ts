@@ -7,12 +7,12 @@ import {
 	rateRelic
 } from './index';
 
-export async function hsrScannerBatch(jsonData: string): Promise<Relic[]> {
+export async function hsrScannerBatch(jsonData: object): Promise<Relic[]> {
 	const result = HsrScannerJsonSchema.safeParse(jsonData);
 	if (result.error)
 		throw new Error('An error occured while parsing the data. The JSON format may be incorrect.');
 
-	const { characters, sets, subStatList } = await getDbData();
+	const { characters, sets, subStatList, rarities } = await getDbData();
 
 	const ratedRelics: Relic[] = [];
 
@@ -42,6 +42,10 @@ export async function hsrScannerBatch(jsonData: string): Promise<Relic[]> {
 
 			if (!scaling) continue;
 
+			const matchedRarity = rarities.find((r) => r.rarity === relic.rarity);
+
+			if (!matchedRarity) continue;
+
 			const substats = relic.substats.map((substat) => {
 				// if ends with a _, check if need to replace it with % (needed to differentiate ATK from ATK% and etc)
 				// otherwise can remove for stats like CRIT Rate where the % is always there
@@ -69,7 +73,7 @@ export async function hsrScannerBatch(jsonData: string): Promise<Relic[]> {
 						matchedPiece: matchedPiece,
 						matchedSet,
 						matchedType: matchedPiece.type,
-						rarity: relic.rarity,
+						...matchedRarity,
 						stats: {
 							mainStat: {
 								name: mainStat.name,
@@ -90,12 +94,12 @@ export async function hsrScannerBatch(jsonData: string): Promise<Relic[]> {
 	return ratedRelics;
 }
 
-export async function stellaBatch(jsonData: string): Promise<Relic[]> {
+export async function stellaBatch(jsonData: object): Promise<Relic[]> {
 	const result = BatchRelicSchema.safeParse(jsonData);
 	if (result.error)
 		throw new Error('An error occured while parsing the data. The JSON format may be incorrect.');
 
-	const { characters, sets } = await getDbData();
+	const { characters, sets, rarities } = await getDbData();
 
 	const ratedRelics: Relic[] = [];
 
@@ -118,6 +122,11 @@ export async function stellaBatch(jsonData: string): Promise<Relic[]> {
 			);
 
 			if (!scaling) continue;
+
+			const rarity = rarities.find((r) => r.rarity === relic.rarity);
+
+			if (!rarity) continue;
+
 			ratedRelics.push(
 				rateRelic(
 					{
@@ -125,7 +134,7 @@ export async function stellaBatch(jsonData: string): Promise<Relic[]> {
 						matchedPiece,
 						matchedType: matchedPiece.type,
 						level: relic.level,
-						rarity: relic.rarity,
+						...rarity,
 						stats: {
 							mainStat: relic.mainStat,
 							substats: relic.substats

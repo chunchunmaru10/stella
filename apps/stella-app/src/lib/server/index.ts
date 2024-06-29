@@ -1,6 +1,6 @@
 import type { CharacterRelicValue, Relic } from '../types';
 import { findCombination, getStatValue, removeSpace } from '$lib';
-import { db, type Stat } from 'database';
+import { db, type Rarity, type Stat } from 'database';
 
 export async function getDbData() {
 	const [sets, subStatList, characters, rarities] = await Promise.all([
@@ -151,10 +151,7 @@ export function getRelicData(
 	if (!stats) throw new Error('No stats found');
 
 	// determine level
-	const possibleLevels: {
-		rarity: number;
-		level: number;
-	}[] = [];
+	const possibleLevels: (Rarity & { level: number })[] = [];
 	for (const rarity of rarities) {
 		for (let i = 0; i <= rarity.maxLevel; i++) {
 			const mainStatScalingAtThisRarity = matchedPiece.type.stats
@@ -168,7 +165,7 @@ export function getRelicData(
 			);
 			if (a === b)
 				possibleLevels.push({
-					rarity: rarity.rarity,
+					...rarity,
 					level: i
 				});
 			// break if already found/past value
@@ -180,10 +177,10 @@ export function getRelicData(
 	if (!possibleLevels.length) throw new Error('Could not determine relic level');
 	let foundRarity: (typeof possibleLevels)[number] | undefined = undefined;
 
-	for (const { level, rarity } of possibleLevels) {
+	for (const level of possibleLevels) {
 		// loop through each substat to see if it matches
-		const numberOfUpgrades = Math.floor(level / 3); // each substats can be upgraded once every 3 levels
-		for (const substat of stats.substats) getSubstatUpgrades(substat, substatList, rarity);
+		const numberOfUpgrades = Math.floor(level.level / 3); // each substats can be upgraded once every 3 levels
+		for (const substat of stats.substats) getSubstatUpgrades(substat, substatList, level.rarity);
 
 		// verify that the upgrades count match
 		const calculatedUpgradeCount = stats.substats.reduce((prev, curr) => {
@@ -194,8 +191,7 @@ export function getRelicData(
 		if (calculatedUpgradeCount >= 0 && (diff === 0 || diff === 1)) {
 			// different need to be 0 or 1 because we don't know whether the relic has 3 or 4 substats initially
 			foundRarity = {
-				rarity,
-				level
+				...level
 			};
 			break;
 		}
@@ -213,7 +209,14 @@ export function getRelicData(
 }
 
 export function rateRelic(
-	{ matchedSet, matchedPiece, matchedType, stats, level, rarity }: ReturnType<typeof getRelicData>,
+	{
+		matchedSet,
+		matchedPiece,
+		matchedType,
+		stats,
+		level,
+		...rarity
+	}: ReturnType<typeof getRelicData>,
 	allCharacters: Awaited<ReturnType<typeof getDbData>>['characters']
 ): Relic {
 	const matchedCharacters: CharacterRelicValue[] = [];
@@ -226,6 +229,7 @@ export function rateRelic(
 		const mainStatsWithMatchedType = character.characterMainStats.filter(
 			(stat) => stat.typeName === matchedType.name
 		);
+
 		// if this type has more than 1 main stats (means its not head or hands), then it is the only mainstat that the relic can get,
 		// thus we can omit to store it in db, which means we cant query it, so need to check here to make sure that the matched type has
 		// at least 2 recommended stats. Note that this should not count when there are only 1 stat recommended for a type (such as only
@@ -245,14 +249,10 @@ export function rateRelic(
 		// thus, the max potential value would be 3 + 3 + 2 + 2 = 10 (We are only taking the 4 best values since a relic can only have max 4 substats)
 
 		let subStatsIncluded = 0;
-		let maxPotentialValue = 0; // accumulated max potential value
-		const actualValues: { stat: string; value: number }[] = []; // actual value/rating of the relic for this character
-		// if the relic only has 3 substats, the unknown 4th substat will be the optimistic potential value
-		// using character A from above as an example, if the relic only has CRIT DMG, ATK%, and HP%, the actual value is 5,
-		// but the potential value is 8, because the max possible value it hasn't gotten yet is 3 (CRIT Rate)
-		// all potentially good stats are added to the array, the frontend will display the stats which when added to the actual
-		// value will exceed the threshold value set by the user.
-		let potentialValues: { stat: string; value: number }[] = [];
+		let maxPotentialValue = 0;
+		let maxPotentialValueAtMaxLevel = 0;
+		const actualValues: CharacterRelicValue['actualValues'] = []; // actual value/rating of the relic for this character
+		let potentialStats: string[] = [];
 
 		// sort by descending priority value and take first priority value (the biggest value, lowest priority)
 		const lowestPriorityValue = character.characterSubstats.sort(
@@ -260,7 +260,7 @@ export function rateRelic(
 		)[0].priority;
 		// need to sort here because we only want to take the highest values to include as max potential value
 		// when the array has value of something like [4, 4, 3, 3, 2], the loop below will only accumulate the max potential value of [4, 4, 3, 3]
-		const subStatValues = character.characterSubstats
+		const substatValues = character.characterSubstats
 			.map((stat) => ({
 				substat: stat.statName,
 				value: lowestPriorityValue - stat.priority + 1
@@ -278,25 +278,28 @@ export function rateRelic(
 			// since already sorted descendingly, can just loop over
 			// when a character only has very little suitable substats (such as only CRIT DMG and CRIT Rate)
 			// this check is to ensure element exists before accessing the element
-			if (!subStatValues[i]) break;
+			if (!substatValues[i]) break;
 			// if this substat is the same as main stat, do not count this into the max because substats cannot contain the main stat
-			if (subStatValues[i].substat === stats.mainStat.name) continue;
+			if (substatValues[i].substat === stats.mainStat.name) continue;
 
-			maxPotentialValue += subStatValues[subStatsIncluded].value;
+			maxPotentialValue += substatValues[subStatsIncluded].value;
 			subStatsIncluded++;
 		}
 
-		// then depending on the number of upgrades, add max potential value according to the max substat value found
-		// so if the max substat value is 3 (assuming there are 3 tiers of suitable substats for this char)
-		// and the number of upgrades is 3 (this relic is between level 9 and 11)
-		// this will add 3 * 3 to the total max potential value calculated from the loop
 		const numberOfUpgrades = Math.floor(level / 3);
-		const maxSubstatValue = subStatValues.reduce((prev, curr) => Math.max(prev, curr.value), 0);
-		maxPotentialValue += maxSubstatValue * numberOfUpgrades;
+		const numberOfUpgradesAtMaxLevel = Math.floor(rarity.maxLevel / 3);
+		const maxSubstatValue = substatValues.reduce((prev, curr) => Math.max(prev, curr.value), 0);
+		// base potential value is the value that an un-upgraded relic could have assuming all of its stats are the best possible
+		const basePotentialValue = substatValues
+			.slice(0, rarity.maxSubstatAmount)
+			.reduce((prev, curr) => prev + curr.value, 0);
+		maxPotentialValue += maxSubstatValue * numberOfUpgrades + basePotentialValue;
+		maxPotentialValueAtMaxLevel +=
+			maxSubstatValue * numberOfUpgradesAtMaxLevel + basePotentialValue;
 
 		// calculate for actual value
-		for (const subStatValue of subStatValues) {
-			const found = stats.substats.find((s) => s.name === subStatValue.substat);
+		for (const substatValue of substatValues) {
+			const found = stats.substats.find((s) => s.name === substatValue.substat);
 
 			if (!found) continue;
 
@@ -304,45 +307,60 @@ export function rateRelic(
 				const penaltyPercentage = found.upgrades[i] / found.maxValue;
 				if (i === 0) {
 					actualValues.push({
-						stat: subStatValue.substat,
-						value: subStatValue.value * penaltyPercentage
+						stat: substatValue.substat,
+						values: [substatValue.value * penaltyPercentage]
 					});
 				} else {
 					const last = actualValues[actualValues.length - 1];
-					last.value += subStatValue.value * penaltyPercentage;
+					last.values.push(substatValue.value * penaltyPercentage);
 				}
 			}
 		}
 
-		// calculate for remaining stats potential value
-		if (stats.substats.length < 4) {
-			// since the substat values are already arranged in descending order,
-			// we just need to filter out the ones that are already included in the relic substats
-			// main stat is also excluded since if the stat is main stat, it cant be a potential substat
-			// and if the relic contains both of them, in this case, the filtered out array will be empty
-			potentialValues = subStatValues
-				.filter(
-					(subStatValue) =>
-						!stats.substats.find((s) => s.name === subStatValue.substat) &&
-						stats.mainStat.name !== subStatValue.substat
-				)
-				.map((stat) => {
-					return {
-						stat: stat.substat,
-						value: stat.value
-					};
-				});
+		// calculate for potential values
+		// potential stats that could be upgraded in the future
+		// can include already existing substats depending on if it is the highest value
+		potentialStats = [];
+		let eligibleSubstats: typeof substatValues = [];
+		// if still can gain substat, assume that it is the best among the remaning ones
+		// get substat from the remaining substat with the highest value
+		// if there are multiple, include them all
+		if (potentialStats.length < rarity.maxSubstatAmount) {
+			// a substat can only be included if it isnt already the main stat and is not included in the existing substat that the relic has
+			eligibleSubstats = substatValues.filter(
+				(s) =>
+					!potentialStats.find((stat) => stat === s.substat) && stats.mainStat.name !== s.substat
+			);
+		} else {
+			for (const stat of stats.substats) {
+				const found = substatValues.find((s) => s.substat === stat.name);
+				if (found) eligibleSubstats.push(found);
+			}
+		}
+		// find substats that have the highest value that is non-zero (can include multiple substats)
+		// the potential values will then be the substats found
+		let highestValue = 0;
+
+		for (const { substat: stat, value } of eligibleSubstats) {
+			if (value === 0) continue;
+			if (value > highestValue) {
+				highestValue = value;
+				potentialStats = [stat];
+			} else if (value === highestValue) potentialStats.push(stat);
 		}
 
-		if (actualValues.length > 0 || potentialValues.length > 0) {
+		if (actualValues.length > 0 || highestValue > 0) {
 			matchedCharacters.push({
 				name: character.name,
 				thumbnail: character.thumbnail,
 				rarity: character.rarity === 4 ? 4 : 5,
 				releaseDate: character.releaseDate,
 				maxPotentialValue,
+				maxPotentialValueAtMaxLevel,
+				remainingNumberOfUpgrades: Math.ceil((rarity.maxLevel - level) / 3),
 				actualValues,
-				potentialValues
+				potentialStats,
+				potentialStatsValue: highestValue
 			});
 		}
 	}
@@ -351,7 +369,7 @@ export function rateRelic(
 		setName: matchedSet.name,
 		image: matchedPiece.thumbnail,
 		level,
-		rarity,
+		rarity: rarity.rarity,
 		relicName: matchedPiece.name,
 		type: matchedType.name,
 		...stats,

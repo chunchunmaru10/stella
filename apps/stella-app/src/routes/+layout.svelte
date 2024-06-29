@@ -8,11 +8,10 @@
 	import { inject } from '@vercel/analytics';
 	import type { Character } from '.prisma/client';
 	import { Banner, Checkbox } from 'flowbite-svelte';
-	import { AnnouncementSchema } from '$lib/schemas';
+	import { settings } from '$lib/stores/settings';
 
 	export let data;
 	let displayAnnouncement = false;
-	let doNotShow: boolean;
 
 	inject({ mode: dev ? 'development' : 'production' });
 
@@ -20,58 +19,35 @@
 	$: setContext('characters', $characters);
 
 	onMount(() => {
-		try {
-			const announcementString = localStorage.getItem('announcement');
-
-			const res = AnnouncementSchema.safeParse(JSON.parse(announcementString ?? ''));
-
-			if (res.error) throw new Error();
-
-			doNotShow = res.data.doNotShow;
-
-			if (
-				data.announcement &&
-				(res.data.message !== data.announcement.message || !res.data.doNotShow)
-			) {
-				displayAnnouncement = true;
-			}
-		} catch (e) {
+		if (
+			data.announcement &&
+			($settings.announcement !== data.announcement.message || !$settings.doNotShowAnnouncement)
+		) {
 			displayAnnouncement = true;
-			doNotShow = false;
-			localStorage.setItem(
-				'announcement',
-				JSON.stringify({
-					message: data.announcement?.message ?? '',
-					doNotShow: false
-				})
-			);
 		}
 	});
 
 	function handleCheckboxChange(e: Event) {
 		const checked = (<HTMLInputElement>e.target).checked;
-		localStorage.setItem(
-			'announcement',
-			JSON.stringify({
-				message: data.announcement?.message ?? '',
-				doNotShow: checked
-			})
-		);
-		doNotShow = checked;
+		settings.update((prev) => ({
+			...prev,
+			announcement: data.announcement?.message ?? '',
+			doNotShowAnnouncement: checked
+		}));
 	}
 </script>
 
 <svelte:head>
 	<title>Stella</title>
 </svelte:head>
-{#if displayAnnouncement && data.announcement?.message && doNotShow !== undefined}
+{#if displayAnnouncement && data.announcement?.message}
 	<Banner position="absolute" innerClass="w-full flex">
 		<div class="mx-4 flex w-full flex-col items-start justify-between md:flex-row md:items-center">
 			<p>
 				{data.announcement.message}
 			</p>
 			<div class="mt-4 min-w-fit md:mt-0">
-				<Checkbox checked={doNotShow} on:change={handleCheckboxChange}>
+				<Checkbox checked={$settings.doNotShowAnnouncement} on:change={handleCheckboxChange}>
 					Don't show this again
 				</Checkbox>
 			</div>

@@ -4,6 +4,7 @@
 	import ProgressBar from './common/ProgressBar.svelte';
 	import { settings } from '$lib/stores/settings';
 	import { fixFloatPrecision } from '$lib';
+	import Tooltip from './common/Tooltip.svelte';
 
 	export let character: CharacterRelicValue & {
 		rating: number;
@@ -12,7 +13,13 @@
 	function formatValue(value: number) {
 		return $settings.ratingsFormat === 'fraction'
 			? fixFloatPrecision(value)
-			: Math.round((value / character.maxPotentialValue) * 100) + '%';
+			: Math.round(
+					(value /
+						($settings.relicRatings === 'actual'
+							? character.maxPotentialValue
+							: character.maxPotentialValueAtMaxLevel)) *
+						100
+				) + '%';
 	}
 
 	let stats: typeof character.actualValues;
@@ -21,10 +28,19 @@
 
 	$: {
 		stats = character.actualValues;
-		progress = (character.rating / character.maxPotentialValue) * 100;
+		progress =
+			(character.rating /
+				($settings.relicRatings === 'potential'
+					? character.maxPotentialValueAtMaxLevel
+					: character.maxPotentialValue)) *
+			100;
 		label =
 			$settings.ratingsFormat === 'fraction'
-				? `${fixFloatPrecision(character.rating)}/${fixFloatPrecision(character.maxPotentialValue)}`
+				? `${fixFloatPrecision(character.rating)}/${fixFloatPrecision(
+						$settings.relicRatings === 'actual'
+							? character.maxPotentialValue
+							: character.maxPotentialValueAtMaxLevel
+					)}`
 				: Math.round(progress) + '%';
 	}
 </script>
@@ -46,17 +62,28 @@
 		<ProgressBar {progress} {label} />
 		<div class="flex flex-wrap gap-2">
 			{#each stats as stat}
-				<Badge>{stat.stat} ({formatValue(stat.value)})</Badge>
+				<Tooltip
+					options={{
+						content: stat.values.map((v) => fixFloatPrecision(v)).join(', ')
+					}}
+				>
+					<Badge>
+						{stat.stat} ({formatValue(stat.values.reduce((prev, curr) => prev + curr, 0))})
+					</Badge>
+				</Tooltip>
 			{/each}
-			{#if $settings.relicRatings == 'potential' && character.potentialValues.length > 0}
-				{@const biggestPotentialValue = character.potentialValues[0].value}
-				{@const biggestPotentialValueFormat = formatValue(biggestPotentialValue)}
-				{@const potentialValues = character.potentialValues.filter(
-					(stat) => stat.value >= biggestPotentialValue
-				)}
-				<Badge class="dark:bg-primary-900/40">
-					{potentialValues.map((potentialValues) => potentialValues.stat).join(', ')} (+{biggestPotentialValueFormat})
-				</Badge>
+			{#if $settings.relicRatings == 'potential' && character.potentialStats.length > 0 && character.remainingNumberOfUpgrades > 0 && character.potentialStatsValue > 0}
+				<Tooltip
+					options={{
+						content: `${character.potentialStats.join(', ')} (${character.potentialStatsValue} * ${character.remainingNumberOfUpgrades})`
+					}}
+				>
+					<Badge class="dark:bg-primary-900/40">
+						Future Upgrades (+{formatValue(
+							character.remainingNumberOfUpgrades * character.potentialStatsValue
+						)})
+					</Badge>
+				</Tooltip>
 			{/if}
 		</div>
 	</div>

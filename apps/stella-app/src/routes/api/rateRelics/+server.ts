@@ -5,7 +5,7 @@ export const POST = async ({ request }) => {
 	try {
 		const req: {
 			importType: BatchImportOption;
-			jsonData: string;
+			jsonData: object;
 		} = await request.json();
 
 		let result: Relic[] = [];

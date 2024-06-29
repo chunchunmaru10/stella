@@ -13,15 +13,13 @@
 	$: {
 		charactersWithRating = characters
 			.map((character) => {
-				// if relic ratings is set to display potential values,
-				// we only pick the zero'th value since we are just calculating the total ratings for sorting,
-				// the displaying of the actual potantial stat's values are not handled in this component
-				const rating = (
-					$settings.relicRatings === 'potential' && character.potentialValues.length > 0
-						? [...character.actualValues, character.potentialValues[0]]
-						: character.actualValues
-				) // if character.potentialValues.length is 0, the resulting array will be the same
-					.reduce((totalRating, currentStat) => totalRating + currentStat.value, 0);
+				let rating = character.actualValues.reduce(
+					(prev, curr) => prev + curr.values.reduce((p, c) => p + c, 0),
+					0
+				);
+
+				if ($settings.relicRatings === 'potential')
+					rating += character.potentialStatsValue * character.remainingNumberOfUpgrades;
 
 				return {
 					...character,
@@ -31,14 +29,23 @@
 			})
 			.filter((c) => {
 				return (
-					(c.rating / c.maxPotentialValue) * 100 >= $settings.minRatingPercentage &&
+					(c.rating /
+						($settings.relicRatings === 'potential'
+							? c.maxPotentialValueAtMaxLevel
+							: c.maxPotentialValue)) *
+						100 >=
+						$settings.minRatingPercentage &&
 					($settings.includeUnreleaseCharacters ||
 						c.releaseDate.getTime() < new Date().getTime()) &&
 					!$settings.excludedCharacters.includes(c.name)
 				);
 			})
 			.sort((a, b) => {
-				const diff = a.rating / a.maxPotentialValue - b.rating / b.maxPotentialValue;
+				let diff = 0;
+				if ($settings.relicRatings === 'potential')
+					diff =
+						a.rating / a.maxPotentialValueAtMaxLevel - b.rating / b.maxPotentialValueAtMaxLevel;
+				else diff = a.rating / a.maxPotentialValue - b.rating / b.maxPotentialValue;
 
 				// if no difference between actual values, sort by name instead
 				return diff === 0 ? a.name.localeCompare(b.name) : -diff; // -diff to sort rating descendingly

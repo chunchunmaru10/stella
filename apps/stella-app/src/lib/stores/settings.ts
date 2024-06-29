@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { SettingsSchema } from '$lib/schemas';
 import type { Settings } from '$lib/types';
 import { writable, type Updater } from 'svelte/store';
 
@@ -8,25 +9,18 @@ function createSettingsStore() {
 		relicRatings: 'actual',
 		minRatingPercentage: 50,
 		ratingsFormat: 'fraction',
-		includeUnreleaseCharacters: false
+		includeUnreleaseCharacters: false,
+		announcement: '',
+		doNotShowAnnouncement: false
 	};
 
 	let settingsString;
 
 	if (browser) settingsString = localStorage.getItem('settings');
 
-	const userSettingsFromLocalStorage = settingsString || JSON.stringify(defaultSettings);
+	const res = SettingsSchema.safeParse(settingsString);
 
-	let loadedSettings: Settings;
-
-	// use try catch here in case the settings in local storage is corrupted (if so, use default value)
-	try {
-		loadedSettings = JSON.parse(userSettingsFromLocalStorage);
-	} catch {
-		loadedSettings = defaultSettings;
-	}
-
-	const settings = writable<Settings>(loadedSettings);
+	const settings = writable<Settings>(res.success ? res.data : defaultSettings);
 
 	function update(updater: Updater<Settings>) {
 		settings.update((current) => {

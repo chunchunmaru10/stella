@@ -4,7 +4,7 @@ import { db } from "database";
 
 export const rarityRouter = router({
   getRarities: procedure.query(async () => await db.rarity.findMany()),
-  changeRarityMaxLevel: procedure
+  updateRarity: procedure
     .input(
       z
         .array(
@@ -17,6 +17,14 @@ export const rarityRouter = router({
               .number()
               .positive("Must be a positive value")
               .int("Max level must be an integer"),
+            baseSubstatAmount: z
+              .number()
+              .positive("Must be a positive value")
+              .int("Base substat amount must be an integer"),
+            maxSubstatAmount: z
+              .number()
+              .positive("Must be a positive value")
+              .int("Base substat amount must be an integer"),
           }),
         )
         .min(1, "At least 1 rarity is required"),
@@ -37,6 +45,8 @@ export const rarityRouter = router({
           await transaction.rarity.update({
             data: {
               maxLevel: rarity.maxLevel,
+              baseSubstatAmount: rarity.baseSubstatAmount,
+              maxSubstatAmount: rarity.maxSubstatAmount,
             },
             where: {
               rarity: rarity.rarity,

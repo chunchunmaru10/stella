@@ -77,10 +77,12 @@ model CharacterMainStat {
 }
 
 model Rarity {
-  rarity         Int               @id
-  maxLevel       Int
-  StatScaling    MainStatScaling[]
-  SubstatScaling SubstatScaling[]
+  rarity            Int               @id
+  maxLevel          Int
+  baseSubstatAmount Int               @default(0)
+  maxSubstatAmount  Int               @default(0)
+  StatScaling       MainStatScaling[]
+  SubstatScaling    SubstatScaling[]
 }
 
 model MainStatScaling {

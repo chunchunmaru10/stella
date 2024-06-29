@@ -56,8 +56,7 @@
 		const localStorageItem = localStorage.getItem('batchRelics');
 		decompress(localStorageItem ?? '')
 			.then((output) => {
-				const rawJson = JSON.parse(output);
-				const res = BatchRelicSchema.safeParse(rawJson);
+				const res = BatchRelicSchema.safeParse(output);
 				if (res.success) {
 					batchRelics = res.data;
 				} else {

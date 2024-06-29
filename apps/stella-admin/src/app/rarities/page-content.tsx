@@ -28,7 +28,7 @@ export default function RarityPageContent({
 
     return getDifference().length > 0;
   }, [rarities, allRarities]);
-  const { isLoading, mutate } = api.rarity.changeRarityMaxLevel.useMutation({
+  const { isLoading, mutate } = api.rarity.updateRarity.useMutation({
     onSuccess: () => {
       toast({
         description: "Changes saved",
@@ -60,7 +60,9 @@ export default function RarityPageContent({
 
       if (
         rarity.rarity !== originalRarity.rarity ||
-        rarity.maxLevel !== originalRarity.maxLevel
+        rarity.maxLevel !== originalRarity.maxLevel ||
+        rarity.baseSubstatAmount !== originalRarity.baseSubstatAmount ||
+        rarity.maxSubstatAmount !== originalRarity.maxSubstatAmount
       )
         different.push(rarity);
     }
@@ -81,11 +83,13 @@ export default function RarityPageContent({
           <span className="ml-2 hidden md:block">Save Changes</span>
         </Button>
       </div>
-      <Table>
+      <Table className="mt-2">
         <TableHeader>
           <TableRow>
             <TableHead className="text-center">Rarity</TableHead>
             <TableHead className="text-center">Max Level</TableHead>
+            <TableHead className="text-center">Base Substat Amount</TableHead>
+            <TableHead className="text-center">Max Substat Amount</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -113,6 +117,52 @@ export default function RarityPageContent({
                     newRarities[i] = {
                       ...newRarities[i],
                       maxLevel: newValue,
+                    };
+                    setRarities(newRarities);
+                  }}
+                />
+                <TableCellInput
+                  value={rarity.baseSubstatAmount}
+                  label="Base Substat Amount"
+                  onValueChange={(newValue) => {
+                    if (newValue === undefined) {
+                      toast({
+                        description: "Base substat amount is required",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    const newRarities = rarities.toSorted(
+                      (a, b) => a.rarity - b.rarity,
+                    );
+
+                    newRarities[i] = {
+                      ...newRarities[i],
+                      baseSubstatAmount: newValue,
+                    };
+                    setRarities(newRarities);
+                  }}
+                />
+                <TableCellInput
+                  value={rarity.maxSubstatAmount}
+                  label="Max Substat Amount"
+                  onValueChange={(newValue) => {
+                    if (newValue === undefined) {
+                      toast({
+                        description: "Max substat amount is required",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    const newRarities = rarities.toSorted(
+                      (a, b) => a.rarity - b.rarity,
+                    );
+
+                    newRarities[i] = {
+                      ...newRarities[i],
+                      maxSubstatAmount: newValue,
                     };
                     setRarities(newRarities);
                   }}
