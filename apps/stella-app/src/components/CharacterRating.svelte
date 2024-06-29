@@ -64,7 +64,7 @@
 			{#each stats as stat}
 				<Tooltip
 					options={{
-						content: stat.values.map((v) => fixFloatPrecision(v)).join(', ')
+						content: stat.values.map((v) => formatValue(v)).join(', ')
 					}}
 				>
 					<Badge>
@@ -73,9 +73,16 @@
 				</Tooltip>
 			{/each}
 			{#if $settings.relicRatings == 'potential' && character.potentialStats.length > 0 && character.remainingNumberOfUpgrades > 0 && character.potentialStatsValue > 0}
+				{@const potentialStatsValueFormated =
+					$settings.ratingsFormat === 'fraction'
+						? character.potentialStatsValue.toString()
+						: (
+								(character.potentialStatsValue / character.maxPotentialValueAtMaxLevel) *
+								100
+							).toFixed(1) + '%'}
 				<Tooltip
 					options={{
-						content: `${character.potentialStats.join(', ')} (${character.potentialStatsValue} * ${character.remainingNumberOfUpgrades})`
+						content: `${character.potentialStats.join(', ')} (${potentialStatsValueFormated} * ${character.remainingNumberOfUpgrades})`
 					}}
 				>
 					<Badge class="dark:bg-primary-900/40">

@@ -54,7 +54,7 @@
 			</span>
 			<Tooltip
 				options={{
-					content: substat.upgrades.join(',')
+					content: substat.upgrades.join(', ')
 				}}
 			>
 				<span>

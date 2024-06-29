@@ -85,15 +85,13 @@ export function getUsableCharactersFromRelic(relic: Relic, settings: Settings) {
 		...relic,
 		usableCharacters: relic.characters
 			?.map((character) => {
-				// if relic ratings is set to display potential values,
-				// we only pick the zero'th value since we are just calculating the total ratings for sorting,
-				// the displaying of the actual potential stat's values are not handled in this component
-				const rating = (
-					settings.relicRatings === 'potential' && character.potentialStats.length > 0
-						? [...character.actualValues, character.potentialStats[0]]
-						: character.actualValues
-				) // if character.potentialValues.length is 0, the resulting array will be the same
-					.reduce((totalRating, currentStat) => totalRating + currentStat.value, 0);
+				let rating = character.actualValues.reduce(
+					(prev, curr) => prev + curr.values.reduce((p, c) => p + c, 0),
+					0
+				);
+
+				if (settings.relicRatings === 'potential')
+					rating += character.potentialStatsValue * character.remainingNumberOfUpgrades;
 
 				return {
 					...character,
