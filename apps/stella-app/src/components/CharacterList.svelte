@@ -3,12 +3,22 @@
 	import CharacterRating from './CharacterRating.svelte';
 	import { settings } from '$lib/stores/settings';
 	import { fixFloatPrecision } from '$lib';
+	import { Toggle } from 'flowbite-svelte';
 
 	export let characters: CharacterRelicValue[];
 
 	let charactersWithRating: (CharacterRelicValue & {
 		rating: number;
 	})[];
+
+	function handleToggleChange(e: Event) {
+		const checked = (e.target as HTMLInputElement).checked;
+
+		settings.update((prev) => ({
+			...prev,
+			relicRatings: checked ? 'potential' : 'actual'
+		}));
+	}
 
 	$: {
 		charactersWithRating = characters
@@ -54,8 +64,15 @@
 </script>
 
 {#if charactersWithRating && charactersWithRating.length}
-	<div class="h-fit w-full">
-		<ul class="space-y-6 text-white">
+	<div class="flex h-full max-h-full w-full flex-col">
+		<div class="min-h-10 px-2">
+			<Toggle checked={$settings.relicRatings === 'potential'} on:change={handleToggleChange}>
+				Show Potential Values
+			</Toggle>
+		</div>
+		<ul
+			class="scrollbar-thin flex-grow space-y-6 overflow-y-auto pr-3 text-white lg:max-h-[calc(95vh-1.5rem-1.5rem-2.5rem)]"
+		>
 			{#each charactersWithRating as character}
 				<CharacterRating {character} />
 			{/each}

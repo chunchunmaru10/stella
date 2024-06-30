@@ -248,7 +248,6 @@ export function rateRelic(
 		// if arranged descendingly, it would be CRIT DMG -> CRIT Rate -> ATK% -> SPD -> Break Effect
 		// thus, the max potential value would be 3 + 3 + 2 + 2 = 10 (We are only taking the 4 best values since a relic can only have max 4 substats)
 
-		let subStatsIncluded = 0;
 		let maxPotentialValue = 0;
 		let maxPotentialValueAtMaxLevel = 0;
 		const actualValues: CharacterRelicValue['actualValues'] = []; // actual value/rating of the relic for this character
@@ -266,25 +265,6 @@ export function rateRelic(
 				value: lowestPriorityValue - stat.priority + 1
 			}))
 			.sort((a, b) => b.value - a.value);
-
-		// calculate for max potential value
-		// to calculate max potential value, we assume that the relic that we have is the perfect relic at the current level
-		// so we assume that:
-		// it starts with 4 initial substats,
-		// every substat upgrades goes to the best substat
-		// every upgrade value is the max value
-		// this loop only calculates the intial values (at level 0)
-		for (let i = 0; subStatsIncluded < 4; i++) {
-			// since already sorted descendingly, can just loop over
-			// when a character only has very little suitable substats (such as only CRIT DMG and CRIT Rate)
-			// this check is to ensure element exists before accessing the element
-			if (!substatValues[i]) break;
-			// if this substat is the same as main stat, do not count this into the max because substats cannot contain the main stat
-			if (substatValues[i].substat === stats.mainStat.name) continue;
-
-			maxPotentialValue += substatValues[subStatsIncluded].value;
-			subStatsIncluded++;
-		}
 
 		const numberOfUpgrades = Math.floor(level / 3);
 		const numberOfUpgradesAtMaxLevel = Math.floor(rarity.maxLevel / 3);

@@ -2,10 +2,12 @@
 	import { getRelicColor } from '$lib';
 	import type { Relic } from '$lib/types';
 	import type { createDialog } from 'svelte-headlessui';
+	import type { Writable } from 'svelte/store';
 
 	export let relic: Relic & { usableCharacters: Relic['characters'] };
 	export let dialog: ReturnType<typeof createDialog>;
-	export let activeRelic: Relic | undefined;
+	// export let activeRelic: Relic | undefined;
+	export let activeRelic: Writable<Relic | undefined>;
 	let relicColor: ReturnType<typeof getRelicColor>;
 
 	$: relicColor = getRelicColor(relic.rarity);
@@ -15,7 +17,7 @@
 	<button
 		class={`${relicColor.from} ${relicColor.to} relative rounded-md bg-gradient-to-br outline-none`}
 		on:click={() => {
-			activeRelic = relic;
+			$activeRelic = relic;
 			dialog?.open();
 		}}
 	>

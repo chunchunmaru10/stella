@@ -9,6 +9,7 @@
 	import FilterRelicSubStats from './FilterRelicSubstats.svelte';
 	import SortRelic from './SortRelic.svelte';
 	import type { Set, Stat, Type } from '.prisma/client';
+	import { settings } from '$lib/stores/settings';
 
 	type RelicWithUsableCharacters = Relic & { usableCharacters: Relic['characters'] };
 
@@ -69,6 +70,11 @@
 
 			return false;
 		});
+	}
+
+	$: {
+		$settings.relicRatings;
+		confirmFilter();
 	}
 
 	function confirmFilter() {

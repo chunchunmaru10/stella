@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="flex items-center gap-4">
+<li class="flex items-center gap-4">
 	<div
 		class={`h-20 min-h-[5rem] w-20 min-w-[5rem] overflow-hidden rounded-full dark:bg-gradient-to-b ${
 			character.rarity === 4 ? 'from-purple-dark to-purple-light' : 'from-gold-dark to-gold-light'
@@ -94,4 +94,4 @@
 			{/if}
 		</div>
 	</div>
-</div>
+</li>
