@@ -167,11 +167,14 @@ export function getRelicData(
 				stats.mainStat.displayPercentage
 			);
 			console.log('a, b: ', `${a}, ${b}`);
-			if (a === b)
+			if (a === b) {
+				console.log('a === b, pushing to possible levels');
 				possibleLevels.push({
 					...rarity,
 					level: i
 				});
+			}
+			console.log('possibleLevels: ', possibleLevels);
 			// break if already found/past value
 			if (b >= a) {
 				console.log('b >= a, breaking');
@@ -179,6 +182,8 @@ export function getRelicData(
 			}
 		}
 	}
+
+	console.log('possibleLevels: ', possibleLevels);
 
 	// determine substat upgrades
 	if (!possibleLevels.length) throw new Error('Could not determine relic level');
