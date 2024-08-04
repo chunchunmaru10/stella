@@ -153,23 +153,30 @@ export function getRelicData(
 	// determine level
 	const possibleLevels: (Rarity & { level: number })[] = [];
 	for (const rarity of rarities) {
+		console.log('Rarity: ', rarity);
 		for (let i = 0; i <= rarity.maxLevel; i++) {
+			console.log('i: ', i);
 			const mainStatScalingAtThisRarity = matchedPiece.type.stats
 				.find((s) => s.name === stats.mainStat.name)
 				?.mainStatScalings.find((s) => s.rarityId === rarity.rarity);
+			console.log('mainStatScalingAtThisRarity: ', mainStatScalingAtThisRarity);
 			if (!mainStatScalingAtThisRarity) continue;
 			const [a, b] = getStatValue(
 				stats.mainStat.value,
 				mainStatScalingAtThisRarity.baseValue + mainStatScalingAtThisRarity.scalingValue * i,
 				stats.mainStat.displayPercentage
 			);
+			console.log('a, b: ', `${a}, ${b}`);
 			if (a === b)
 				possibleLevels.push({
 					...rarity,
 					level: i
 				});
 			// break if already found/past value
-			if (b >= a) break;
+			if (b >= a) {
+				console.log('b >= a, breaking');
+				break;
+			}
 		}
 	}
 
