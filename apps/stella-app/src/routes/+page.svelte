@@ -44,7 +44,7 @@
 		</Card>
 	{:else}
 		<Card
-			class="my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto scrollbar-thin"
+			class="scrollbar-thin my-auto flex h-full max-h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto"
 		>
 			<RelicStats data={relic} />
 			<div>
@@ -58,7 +58,7 @@
 			</div>
 		</Card>
 		<Card
-			class="mb-8 hidden h-full min-w-full overflow-y-auto scrollbar-thin xl:mb-0 xl:block xl:h-[var(--main-height)]"
+			class="scrollbar-thin mb-8 hidden h-full min-w-full overflow-y-auto xl:mb-0 xl:block xl:h-[var(--main-height)]"
 		>
 			<CharacterList characters={relic.characters} />
 		</Card>

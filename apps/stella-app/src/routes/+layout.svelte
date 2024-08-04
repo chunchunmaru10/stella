@@ -56,6 +56,6 @@
 {/if}
 <Toaster />
 <Nav />
-<main class="mb-8 px-8 md:h-[var(--main-height)]">
+<main class="px-8 pb-8 md:h-[var(--main-height)]">
 	<slot />
 </main>

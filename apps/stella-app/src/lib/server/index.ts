@@ -258,7 +258,7 @@ export function rateRelic(
 			(a, b) => b.priority - a.priority
 		)[0].priority;
 		// need to sort here because we only want to take the highest values to include as max potential value
-		// when the array has value of something like [4, 4, 3, 3, 2], the loop below will only accumulate the max potential value of [4, 4, 3, 3]
+		// when the array has value of something like [4, 4, 3, 3, 2], the substatValues.slice called below will only take the highest values
 		const substatValues = character.characterSubstats
 			.map((stat) => ({
 				substat: stat.statName,
@@ -305,7 +305,7 @@ export function rateRelic(
 		// if still can gain substat, assume that it is the best among the remaning ones
 		// get substat from the remaining substat with the highest value
 		// if there are multiple, include them all
-		if (potentialStats.length < rarity.maxSubstatAmount) {
+		if (stats.substats.length < rarity.maxSubstatAmount) {
 			// a substat can only be included if it isnt already the main stat and is not included in the existing substat that the relic has
 			eligibleSubstats = substatValues.filter(
 				(s) =>

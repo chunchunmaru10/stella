@@ -4,6 +4,7 @@
 	import { settings } from '$lib/stores/settings';
 	import { fixFloatPrecision } from '$lib';
 	import { Toggle } from 'flowbite-svelte';
+	import Tooltip from './common/Tooltip.svelte';
 
 	export let characters: CharacterRelicValue[];
 
@@ -65,10 +66,20 @@
 
 {#if charactersWithRating && charactersWithRating.length}
 	<div class="flex h-full max-h-full w-full flex-col">
-		<div class="min-h-10 px-2">
+		<div class="flex min-h-10 items-center justify-between px-2">
 			<Toggle checked={$settings.relicRatings === 'potential'} on:change={handleToggleChange}>
-				Show Potential Values
+				Show Future Upgrades
 			</Toggle>
+			<Tooltip
+				options={{
+					content:
+						'<p>View more info about this toggle <a class="underline" href="/info#futurePotentialUpgrades" target="_blank">here</a>.</p>',
+					allowHTML: true,
+					interactive: true
+				}}
+			>
+				?
+			</Tooltip>
 		</div>
 		<ul
 			class="scrollbar-thin flex-grow space-y-6 overflow-y-auto pr-3 text-white lg:max-h-[calc(95vh-1.5rem-1.5rem-2.5rem)]"
