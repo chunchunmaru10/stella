@@ -153,37 +153,28 @@ export function getRelicData(
 	// determine level
 	const possibleLevels: (Rarity & { level: number })[] = [];
 	for (const rarity of rarities) {
-		console.log('Rarity: ', rarity);
 		for (let i = 0; i <= rarity.maxLevel; i++) {
-			console.log('i: ', i);
 			const mainStatScalingAtThisRarity = matchedPiece.type.stats
 				.find((s) => s.name === stats.mainStat.name)
 				?.mainStatScalings.find((s) => s.rarityId === rarity.rarity);
-			console.log('mainStatScalingAtThisRarity: ', mainStatScalingAtThisRarity);
 			if (!mainStatScalingAtThisRarity) continue;
 			const [a, b] = getStatValue(
 				stats.mainStat.value,
 				mainStatScalingAtThisRarity.baseValue + mainStatScalingAtThisRarity.scalingValue * i,
 				stats.mainStat.displayPercentage
 			);
-			console.log('a, b: ', `${a}, ${b}`);
 			if (a === b) {
-				console.log('a === b, pushing to possible levels');
 				possibleLevels.push({
 					...rarity,
 					level: i
 				});
 			}
-			console.log('possibleLevels: ', possibleLevels);
 			// break if already found/past value
 			if (b >= a) {
-				console.log('b >= a, breaking');
 				break;
 			}
 		}
 	}
-
-	console.log('possibleLevels: ', possibleLevels);
 
 	// determine substat upgrades
 	if (!possibleLevels.length) throw new Error('Could not determine relic level');
@@ -192,15 +183,26 @@ export function getRelicData(
 	for (const level of possibleLevels) {
 		// loop through each substat to see if it matches
 		const numberOfUpgrades = Math.floor(level.level / 3); // each substats can be upgraded once every 3 levels
-		for (const substat of stats.substats) getSubstatUpgrades(substat, substatList, level.rarity);
+		console.log('numberOfUpgrades: ', numberOfUpgrades);
+		for (const substat of stats.substats) {
+			console.log(
+				`values passed to getSubstatUpgrades, substat: ${substat}, substatList: ${substatList}, rarity: ${level.rarity}`
+			);
+			getSubstatUpgrades(substat, substatList, level.rarity);
+			console.log('modified substat values to: ', substat);
+		}
+		console.log('stat.substats: ', stats.substats);
 
 		// verify that the upgrades count match
 		const calculatedUpgradeCount = stats.substats.reduce((prev, curr) => {
 			return prev + curr.upgrades.length - 1; // need to minus 1 to count for the initial substat value that is also counted in the combo
 		}, 0);
 
+		console.log('calculatedUpgradeCount: ', calculatedUpgradeCount);
 		const diff = numberOfUpgrades - calculatedUpgradeCount;
+		console.log('diff: ', diff);
 		if (calculatedUpgradeCount >= 0 && (diff === 0 || diff === 1)) {
+			console.log('if condition fulfilled, found rarity: ', level);
 			// different need to be 0 or 1 because we don't know whether the relic has 3 or 4 substats initially
 			foundRarity = {
 				...level
@@ -209,6 +211,7 @@ export function getRelicData(
 		}
 	}
 
+	console.log('foundRarity: ', foundRarity);
 	if (!foundRarity) throw new Error('Could not determine relic rarity');
 
 	return {
