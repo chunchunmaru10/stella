@@ -47,7 +47,10 @@ export default function StatList({
     () =>
       allStats
         .filter((s) =>
-          s.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
+          s.name
+            .toLocaleLowerCase()
+            .replaceAll(" ", "")
+            .includes(filterText.toLocaleLowerCase().replaceAll(" ", "")),
         )
         .sort((a, b) => {
           const smaller = sortBy.order === "asc" ? a : b;

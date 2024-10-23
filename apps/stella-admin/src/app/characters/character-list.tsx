@@ -39,7 +39,10 @@ export default function CharacterList({
     () =>
       allCharacters
         .filter((c) =>
-          c.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
+          c.name
+            .toLocaleLowerCase()
+            .replaceAll(" ", "")
+            .includes(filterText.toLocaleLowerCase().replaceAll(" ", "")),
         )
         .sort((a, b) => {
           const smaller = sortBy.order === "asc" ? a : b;

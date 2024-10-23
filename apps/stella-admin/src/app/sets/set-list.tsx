@@ -33,7 +33,10 @@ export default function SetList({ allSets }: { allSets: Set[] }) {
     () =>
       allSets
         .filter((s) =>
-          s.name.toLocaleLowerCase().replace(" ", "").includes(filterText),
+          s.name
+            .toLocaleLowerCase()
+            .replaceAll(" ", "")
+            .includes(filterText.toLocaleLowerCase().replaceAll(" ", "")),
         )
         .sort((a, b) => {
           const smaller = sortOrder === "asc" ? a : b;

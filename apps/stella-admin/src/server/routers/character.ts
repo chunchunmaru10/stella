@@ -134,7 +134,7 @@ export const characterRouter = router({
           rarity: input.rarity,
           releaseDate: input.releaseDate,
           sets: {
-            deleteMany: removedSets.map((set) => ({ name: set.name })),
+            disconnect: removedSets.map((set) => ({ name: set.name })),
             connect: newSets.map((set) => ({
               name: set,
             })),
