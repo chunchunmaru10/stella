@@ -43,6 +43,7 @@
 	"dependencies": {
 		"@vercel/analytics": "^1.2.2",
 		"database": "workspace:*",
+		"fastest-levenshtein": "^1.0.16",
 		"lz-string": "^1.5.0",
 		"react-dom": "^18.2.0",
 		"sharp": "^0.33.2",

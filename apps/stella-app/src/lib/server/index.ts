@@ -1,6 +1,7 @@
 import type { CharacterRelicValue, Relic } from '../types';
 import { findCombination, getStatValue, removeSpace } from '$lib';
 import { db, type Rarity, type Stat } from 'database';
+import { closest } from 'fastest-levenshtein';
 
 export async function getDbData() {
 	const [sets, subStatList, characters, rarities] = await Promise.all([
@@ -119,32 +120,29 @@ export function getRelicData(
 	substatList: Awaited<ReturnType<typeof getDbData>>['subStatList'],
 	rarities: Awaited<ReturnType<typeof getDbData>>['rarities']
 ) {
-	let matchedSet: (typeof sets)[number] | undefined;
-	let matchedPiece: (typeof sets)[number]['pieces'][number] | undefined;
-	let stats: ReturnType<typeof getStatsFromRawString> | undefined;
+	const closestSetName = closest(
+		removeSpace(rawString),
+		sets.map((s) => s.name)
+	);
 
-	for (const set of sets) {
-		// temporary remove line breaks because some relic set names may be too long
-		if (removeSpace(rawString).includes(removeSpace(set.name))) {
-			matchedSet = set;
+	const matchedSet = sets.find((s) => s.name == closestSetName);
 
-			// remove text after 2-Pc, which is the set details and description
-			// this is to prevent if there is a set that let's say increases CRIT DMG by 10%, it might include CRIT DMG as one of the substats.
-			rawString = rawString.slice(0, rawString.toLowerCase().indexOf('2-pc'));
-		}
-	}
+	// remove text after 2-Pc, which is the set details and description
+	// this is to prevent if there is a set that let's say increases CRIT DMG by 10%, it might include CRIT DMG as one of the substats.
+	rawString = rawString.slice(0, rawString.toLowerCase().indexOf('2-pc'));
 
 	if (!matchedSet) throw new Error('No matched set found');
 
-	for (const piece of matchedSet.pieces) {
-		// temporary remove line breaks because some relic set names may be too long
-		if (piece && removeSpace(rawString).includes(removeSpace(piece.name)) && piece.type?.name) {
-			matchedPiece = piece;
-			stats = getStatsFromRawString(rawString, piece.type.stats, substatList);
-		}
-	}
+	const closestPieceName = closest(
+		removeSpace(rawString),
+		matchedSet.pieces.map((p) => p.name)
+	);
+
+	const matchedPiece = matchedSet.pieces.find((p) => p.name == closestPieceName);
 
 	if (!matchedPiece) throw new Error('No matched piece found');
+
+	const stats = getStatsFromRawString(rawString, matchedPiece.type.stats, substatList);
 
 	if (!matchedPiece.type) throw new Error('No matched piece type found');
 
