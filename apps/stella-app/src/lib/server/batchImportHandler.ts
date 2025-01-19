@@ -17,6 +17,7 @@ export async function hsrScannerBatch(jsonData: object): Promise<Relic[]> {
 	const ratedRelics: Relic[] = [];
 
 	const flatSubstats = getFlatStatsWithPercentageVariants(subStatList.map((s) => s.name));
+	let index = 0;
 	for (const relic of result.data.relics) {
 		try {
 			if (flatSubstats.includes(relic.mainstat) && !relic.slot.match(/(Head|Hands)/)) {
@@ -66,26 +67,28 @@ export async function hsrScannerBatch(jsonData: object): Promise<Relic[]> {
 				return newSubstatFormat;
 			});
 
-			ratedRelics.push(
-				rateRelic(
-					{
-						level: relic.level,
-						matchedPiece: matchedPiece,
-						matchedSet,
-						matchedType: matchedPiece.type,
-						...matchedRarity,
-						stats: {
-							mainStat: {
-								name: mainStat.name,
-								value: scaling.baseValue + scaling.scalingValue * relic.level,
-								displayPercentage: mainStat.displayPercentage
-							},
-							substats
-						}
-					},
-					characters
-				)
+			const ratedRelic = rateRelic(
+				{
+					level: relic.level,
+					matchedPiece: matchedPiece,
+					matchedSet,
+					matchedType: matchedPiece.type,
+					...matchedRarity,
+					stats: {
+						mainStat: {
+							name: mainStat.name,
+							value: scaling.baseValue + scaling.scalingValue * relic.level,
+							displayPercentage: mainStat.displayPercentage
+						},
+						substats
+					}
+				},
+				characters
 			);
+
+			ratedRelic.index = ++index;
+
+			ratedRelics.push(ratedRelic);
 		} catch {
 			// don't have to do anything in catch block, just skip if error to prevent one misparsed relic to ruin the entire import
 		}
@@ -127,22 +130,24 @@ export async function stellaBatch(jsonData: object): Promise<Relic[]> {
 
 			if (!rarity) continue;
 
-			ratedRelics.push(
-				rateRelic(
-					{
-						matchedSet,
-						matchedPiece,
-						matchedType: matchedPiece.type,
-						level: relic.level,
-						...rarity,
-						stats: {
-							mainStat: relic.mainStat,
-							substats: relic.substats
-						}
-					},
-					characters
-				)
+			const ratedRelic = rateRelic(
+				{
+					matchedSet,
+					matchedPiece,
+					matchedType: matchedPiece.type,
+					level: relic.level,
+					...rarity,
+					stats: {
+						mainStat: relic.mainStat,
+						substats: relic.substats
+					}
+				},
+				characters
 			);
+
+			ratedRelic.index = relic.index;
+
+			ratedRelics.push(ratedRelic);
 		} catch {
 			// don't have to do anything in catch block, just skip if error to prevent one misparsed relic to ruin the entire import
 		}

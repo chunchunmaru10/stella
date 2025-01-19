@@ -76,6 +76,7 @@ export const CharacterSchema = z.preprocess(
 export const RelicSchema = z.preprocess(
 	parseJsonPreprocessor,
 	z.object({
+		index: z.number().default(0),
 		setName: z.string(),
 		image: z.string(),
 		relicName: z.string(),

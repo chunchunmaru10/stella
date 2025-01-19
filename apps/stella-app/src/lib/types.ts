@@ -21,6 +21,12 @@ export type CharacterRelicValue = z.infer<typeof CharacterSchema>;
 
 export type Settings = z.infer<typeof SettingsSchema>;
 
-export type SortOption = 'Piece Type' | 'Set' | 'Character Count' | 'Rarity' | 'Level';
+export type SortOption =
+	| 'Piece Type'
+	| 'Set'
+	| 'Character Count'
+	| 'Rarity'
+	| 'Level'
+	| 'Import Order';
 
 export type BatchImportOption = 'HSR Scanner' | 'Stella';

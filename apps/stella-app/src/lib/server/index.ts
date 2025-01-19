@@ -352,6 +352,7 @@ export function rateRelic(
 	}
 
 	return {
+		index: 0,
 		setName: matchedSet.name,
 		image: matchedPiece.thumbnail,
 		level,

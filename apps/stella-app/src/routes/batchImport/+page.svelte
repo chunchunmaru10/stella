@@ -6,7 +6,7 @@
 	import { toast } from '$lib/stores/toast';
 	import type { Relic, Settings } from '$lib/types';
 	import Icon from '@iconify/svelte';
-	import { Hr, Spinner } from 'flowbite-svelte';
+	import { Button, Hr, Spinner } from 'flowbite-svelte';
 	import lz from 'lz-string';
 	import { onMount } from 'svelte';
 	import type { createDialog } from 'svelte-headlessui';
@@ -22,7 +22,6 @@
 	export let data;
 	let batchRelics: Relic[] = [];
 	const activeRelic = writable<Relic | undefined>(undefined);
-	// let activeRelic: Relic | undefined;
 	let loading = true;
 	let dialog: ReturnType<typeof createDialog>;
 	let filterDrawerHidden = true;
@@ -50,10 +49,6 @@
 
 	$: {
 		filteredBatchRelics.set(mapBatchRelicWithCharacter(batchRelics, $settings));
-	}
-
-	$: {
-		console.trace(activeRelic);
 	}
 
 	onMount(() => {
@@ -108,9 +103,6 @@
 				break;
 			case 'clearImportedData':
 				clearImportedData();
-				break;
-			case 'filter':
-				filterDrawerHidden = false;
 				break;
 		}
 	}
@@ -167,8 +159,14 @@
 	/>
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="text-3xl font-bold">Batch Import</h1>
-		<div class="">
-			<Dropdown options={['Export', 'Clear Imported Data', 'Filter']} onSelect={onDropdownSelect}>
+		<div class="flex items-center gap-2">
+			<Button
+				class="bg-primary-600 hover:bg-primary-700 inline-flex w-full justify-center rounded-md p-3 text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+				on:click={() => (filterDrawerHidden = false)}
+			>
+				<Icon icon="mingcute:filter-line" class="h-4 w-4" />
+			</Button>
+			<Dropdown options={['Export', 'Clear Imported Data']} onSelect={onDropdownSelect}>
 				<Icon icon="fluent:options-16-filled" class="h-4 w-4" slot="button" />
 			</Dropdown>
 		</div>
