@@ -23,7 +23,10 @@
 			data.announcement &&
 			($settings.announcement !== data.announcement.message || !$settings.doNotShowAnnouncement)
 		) {
-			$settings.announcement = data.announcement.message;
+			settings.update((prev) => ({
+				...prev,
+				announcement: data.announcement?.message ?? ''
+			}));
 			displayAnnouncement = true;
 		}
 	});
