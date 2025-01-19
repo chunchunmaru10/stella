@@ -17,7 +17,6 @@ export async function hsrScannerBatch(jsonData: object): Promise<Relic[]> {
 	const ratedRelics: Relic[] = [];
 
 	const flatSubstats = getFlatStatsWithPercentageVariants(subStatList.map((s) => s.name));
-	let index = 0;
 	for (const relic of result.data.relics) {
 		try {
 			if (flatSubstats.includes(relic.mainstat) && !relic.slot.match(/(Head|Hands)/)) {
@@ -86,7 +85,9 @@ export async function hsrScannerBatch(jsonData: object): Promise<Relic[]> {
 				characters
 			);
 
-			ratedRelic.index = ++index;
+			const index = Number.parseInt(relic._uid.replaceAll('relic_', ''));
+
+			if (!isNaN(index)) ratedRelic.index = index;
 
 			ratedRelics.push(ratedRelic);
 		} catch {

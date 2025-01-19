@@ -46,7 +46,7 @@ export const HsrScannerJsonSchema = z.preprocess(
 				location: z.string(),
 				lock: z.boolean(),
 				discard: z.boolean(),
-				_id: z.string()
+				_uid: z.string()
 			})
 		)
 	})
