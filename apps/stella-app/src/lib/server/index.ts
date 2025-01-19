@@ -185,6 +185,9 @@ export function getRelicData(
 			getSubstatUpgrades(substat, substatList, level.rarity);
 		}
 
+		// check if all substats have at least 1 upgrade
+		if (stats.substats.find((s) => !s.upgrades.length)) continue;
+
 		// verify that the upgrades count match
 		const calculatedUpgradeCount = stats.substats.reduce((prev, curr) => {
 			return prev + curr.upgrades.length - 1; // need to minus 1 to count for the initial substat value that is also counted in the combo
