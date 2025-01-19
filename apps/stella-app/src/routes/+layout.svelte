@@ -19,14 +19,11 @@
 	$: setContext('characters', $characters);
 
 	onMount(() => {
-		if (!data.announcement) return;
-
-		$settings.announcement = data.announcement.message;
-
 		if (
 			data.announcement &&
 			($settings.announcement !== data.announcement.message || !$settings.doNotShowAnnouncement)
 		) {
+			$settings.announcement = data.announcement.message;
 			displayAnnouncement = true;
 		}
 	});
