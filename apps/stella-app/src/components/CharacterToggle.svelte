@@ -23,7 +23,7 @@
 	on:click={toggleActive}
 	class={`${active ? '' : 'opacity-50'} flex flex-col items-center justify-between rounded-md bg-gradient-to-b py-2 ${
 		character.rarity === 4 ? 'from-purple-dark to-purple-light' : 'from-gold-dark to-gold-light'
-	} transition hover:scale-110`}
+	} transition hover:scale-105`}
 >
 	<img src={character.thumbnail} alt={character.name} class="mb-4 h-20 w-20" />
 	<p class="my-auto font-semibold">{character.name}</p>

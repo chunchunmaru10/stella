@@ -208,7 +208,7 @@
 	<p>
 		Batch import makes it easy to bring in a large number of relics at once. To use this feature,
 		you'll need a relic scanner. The scanner creates a <a
-			href="https://www.w3schools.com/whatis/whatis_json.asp"
+			href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/JSON"
 			target="_blank">JSON</a
 		> file output, which you can then import into the batch importer to analyze the relics. Currently,
 		there are only two source file formats available. For more details on each format, please see the
@@ -227,13 +227,12 @@
 
 	<h4><a href="https://github.com/kel-z/HSR-Scanner" target="_blank">HSR Scanner</a></h4>
 	<p>
-		When importing via HSR Scanner, it's advisable to scan only 5-star relics (you can adjust this
-		setting via the app) since Stella treats all relics as 5-star. That said, even if lower-rarity
-		relics are included, the rating system should still function, albeit displaying all relics with
-		a gold background (rather than purple for 4-star etc). While the HSR Scanner supports character
-		and light cone scanning, this data would be ignored by Stella. Hence, if you're solely using
-		this tool to import into Stella, you can deselect those options to speed up the scanning
-		process.
+		When importing via the HSR Scanner, the "Import Order" sort option will be based on the relic
+		order in the provided JSON file. Since the scanner alone cannot determine the relic's obtainment
+		date, it is recommended to first sort the relics in the game by the date obtained, then scan
+		them with the HSR Scanner, and finally import them into Stella. While this approach may help
+		preserve the relic's obtainment date, it is not guaranteed, as the HSR Scanner does not
+		explicitly ensure that the scanning order matches the output order.
 	</p>
 
 	<h3>Interface</h3>
