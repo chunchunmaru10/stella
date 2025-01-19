@@ -32,7 +32,8 @@ export const HsrScannerJsonSchema = z.preprocess(
 	z.object({
 		relics: z.array(
 			z.object({
-				set: z.string(),
+				set_id: z.coerce.number(),
+				name: z.string(),
 				slot: z.string(),
 				rarity: z.number(),
 				level: z.number(),

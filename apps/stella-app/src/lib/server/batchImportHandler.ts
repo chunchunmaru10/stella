@@ -24,7 +24,7 @@ export async function hsrScannerBatch(jsonData: object): Promise<Relic[]> {
 				relic.mainstat += '%';
 			}
 
-			const matchedSet = sets.find((s) => s.name === relic.set);
+			const matchedSet = sets.find((s) => s.name === relic.name);
 
 			if (!matchedSet) continue;
 
