@@ -150,7 +150,7 @@ export function getRelicData(
 
 	// determine level
 	const possibleLevels: (Rarity & { level: number })[] = [];
-	for (const rarity of rarities) {
+	for (const rarity of rarities.sort((a, b) => b.rarity - a.rarity)) {
 		for (let i = 0; i <= rarity.maxLevel; i++) {
 			const mainStatScalingAtThisRarity = matchedPiece.type.stats
 				.find((s) => s.name === stats.mainStat.name)
