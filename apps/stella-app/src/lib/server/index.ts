@@ -120,16 +120,16 @@ export function getRelicData(
 	substatList: Awaited<ReturnType<typeof getDbData>>['subStatList'],
 	rarities: Awaited<ReturnType<typeof getDbData>>['rarities']
 ) {
+	// remove text after 2-Pc, which is the set details and description
+	// this is to prevent if there is a set that let's say increases CRIT DMG by 10%, it might include CRIT DMG as one of the substats.
+	rawString = rawString.slice(0, rawString.toLowerCase().indexOf('2-pc'));
+
 	const closestSetName = closest(
 		removeSpace(rawString),
 		sets.map((s) => s.name)
 	);
 
 	const matchedSet = sets.find((s) => s.name == closestSetName);
-
-	// remove text after 2-Pc, which is the set details and description
-	// this is to prevent if there is a set that let's say increases CRIT DMG by 10%, it might include CRIT DMG as one of the substats.
-	rawString = rawString.slice(0, rawString.toLowerCase().indexOf('2-pc'));
 
 	if (!matchedSet) throw new Error('No matched set found');
 
