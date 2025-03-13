@@ -1,4 +1,4 @@
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/trpc/server";
 import NewAnnouncementForm from "./new-announcement.form";
 

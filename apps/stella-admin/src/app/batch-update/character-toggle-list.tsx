@@ -1,19 +1,7 @@
 import SortableTableHead from "@/components/sortable-table-head";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -32,12 +20,13 @@ export default function CharacterToggleList({
   characters,
   selectedCharacters,
   setSelectedCharacters,
+  onProceedClicked,
 }: {
   characters: Character[];
   selectedCharacters: Character[];
   setSelectedCharacters: Dispatch<SetStateAction<Character[]>>;
+  onProceedClicked: () => void;
 }) {
-  const [shouldCheckNewCharacter, setShouldCheckNewCharacter] = useState(false);
   const [filter, setFilter] = useState("");
   const [sortBy, setSortBy] = useState<{
     key: string;
@@ -75,7 +64,7 @@ export default function CharacterToggleList({
 
   return (
     <>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex w-full items-center justify-between gap-4">
           <div className="relative max-w-64 flex-1">
             <Input
@@ -89,57 +78,7 @@ export default function CharacterToggleList({
               size={16}
             />
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button>Proceed</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="max-h-[95vh]">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Confirm Batch Update</AlertDialogTitle>
-              </AlertDialogHeader>
-              <div>
-                {selectedCharacters.length ? (
-                  <>
-                    <p className="text-left">
-                      The following characters will be updated (
-                      {selectedCharacters.length} in total):{" "}
-                    </p>
-                    <ul className="mt-4 max-h-[50vh] list-inside list-disc overflow-y-auto text-left scrollbar-thin">
-                      {selectedCharacters.map((character) => (
-                        <li key={character.name}>{character.name}</li>
-                      ))}
-                    </ul>
-                  </>
-                ) : (
-                  <p>
-                    No existing characters will be updated. Please enable
-                    checking for new characters to proceed.
-                  </p>
-                )}
-                <div className="mt-4 flex items-center gap-2">
-                  <Switch
-                    id="check-new-characters-toggle"
-                    checked={shouldCheckNewCharacter}
-                    onCheckedChange={setShouldCheckNewCharacter}
-                  />
-                  <Label htmlFor="check-new-characters-toggle">
-                    Check For New Characters
-                  </Label>
-                </div>
-                <DialogFooter className="mt-4">
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    disabled={
-                      selectedCharacters.length === 0 &&
-                      !shouldCheckNewCharacter
-                    }
-                  >
-                    Continue
-                  </AlertDialogAction>
-                </DialogFooter>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button onClick={onProceedClicked}>Proceed</Button>
         </div>
       </div>
       <div className="mt-4 max-h-[60vh] overflow-y-auto scrollbar-none">

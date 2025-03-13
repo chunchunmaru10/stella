@@ -13,11 +13,11 @@ export default function TRPCProvider({
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        logger: {
-          error: () => {},
-          log: () => {},
-          warn: () => {},
-        },
+        // logger: {
+        //   error: () => {},
+        //   log: () => {},
+        //   warn: () => {},
+        // },
       }),
   );
   const [trpcClient] = useState(() =>
@@ -25,9 +25,9 @@ export default function TRPCProvider({
       links: [
         unstable_httpBatchStreamLink({
           url: getUrl(),
+          transformer,
         }),
       ],
-      transformer,
     }),
   );
   return (

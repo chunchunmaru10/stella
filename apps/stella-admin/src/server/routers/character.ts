@@ -185,4 +185,17 @@ export const characterRouter = router({
 
       await deleteImage(`characters/${input}`);
     }),
+  batchUpdateCharacters: procedure
+    .input(
+      z.object({
+        shouldCheckForNewCharacters: z.boolean(),
+        characters: z.array(z.string().min(1, "Character name is required.")),
+      }),
+    )
+    .query(async function* ({ input }) {
+      for (let i = 0; i < 3; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        yield i;
+      }
+    }),
 });

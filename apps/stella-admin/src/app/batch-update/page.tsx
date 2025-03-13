@@ -6,7 +6,6 @@ export default async function BatchUpdatePage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Batch Update</h1>
       <BatchUpdatePageContent characters={characters} />
     </>
   );
