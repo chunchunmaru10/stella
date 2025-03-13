@@ -27,7 +27,7 @@ export default function SetForm({ allTypes, existingSet }: Props) {
   );
   const [pieces, setPieces] = useState<Piece[]>(existingSet?.pieces ?? []);
   const router = useRouter();
-  const { mutate: addSet, isLoading: addSetLoading } =
+  const { mutate: addSet, isPending: addSetLoading } =
     api.set.addSet.useMutation({
       onSuccess: () => {
         toast({
@@ -46,7 +46,7 @@ export default function SetForm({ allTypes, existingSet }: Props) {
         });
       },
     });
-  const { mutate: editSet, isLoading: editSetIsLoading } =
+  const { mutate: editSet, isPending: editSetIsLoading } =
     api.set.editSet.useMutation({
       onSuccess: () => {
         toast({
@@ -70,7 +70,7 @@ export default function SetForm({ allTypes, existingSet }: Props) {
         });
       },
     });
-  const { mutate: deleteSet, isLoading: deleteSetIsLoading } =
+  const { mutate: deleteSet, isPending: deleteSetIsLoading } =
     api.set.deleteSet.useMutation({
       onSuccess: () => {
         toast({

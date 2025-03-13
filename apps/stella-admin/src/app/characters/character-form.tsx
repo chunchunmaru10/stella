@@ -80,7 +80,7 @@ export default function CharacterForm({
   );
   const { toast } = useToast();
   const router = useRouter();
-  const { isLoading: addCharacterIsLoading, mutate: addCharacter } =
+  const { isPending: addCharacterIsLoading, mutate: addCharacter } =
     api.character.addCharacter.useMutation({
       onSuccess: async () => {
         toast({
@@ -98,7 +98,7 @@ export default function CharacterForm({
         });
       },
     });
-  const { isLoading: editCharacterIsLoading, mutate: editCharacter } =
+  const { isPending: editCharacterIsLoading, mutate: editCharacter } =
     api.character.editCharacter.useMutation({
       onSuccess: () => {
         toast({
@@ -122,7 +122,7 @@ export default function CharacterForm({
         });
       },
     });
-  const { isLoading: deleteCharacterIsLoading, mutate: deleteCharacter } =
+  const { isPending: deleteCharacterIsLoading, mutate: deleteCharacter } =
     api.character.deleteCharacter.useMutation({
       onSuccess: async () => {
         toast({

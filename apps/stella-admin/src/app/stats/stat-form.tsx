@@ -74,7 +74,7 @@ export default function StatForm({ existingStat, allRarities }: Props) {
 
     return currentMax + 1;
   }, [substatScalings]);
-  const { mutate: editStat, isLoading: editStatIsLoading } =
+  const { mutate: editStat, isPending: editStatIsLoading } =
     api.stat.editStat.useMutation({
       onSuccess: () => {
         toast({

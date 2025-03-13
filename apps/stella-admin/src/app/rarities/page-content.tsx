@@ -28,7 +28,7 @@ export default function RarityPageContent({
 
     return getDifference().length > 0;
   }, [rarities, allRarities]);
-  const { isLoading, mutate } = api.rarity.updateRarity.useMutation({
+  const { isPending, mutate } = api.rarity.updateRarity.useMutation({
     onSuccess: () => {
       toast({
         description: "Changes saved",
@@ -76,7 +76,7 @@ export default function RarityPageContent({
         <h1 className="text-2xl font-bold">Rarities</h1>
         <Button
           disabled={!hasChanged}
-          isLoading={isLoading}
+          isLoading={isPending}
           onClick={() => mutate(getDifference())}
         >
           <Save size={20} />
