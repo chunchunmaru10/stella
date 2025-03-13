@@ -9,7 +9,7 @@ import React, { useState } from "react";
 
 export default function NewAnnouncementForm() {
   const [message, setMessage] = useState("");
-  const { mutate, isLoading } = api.announcement.createAnnouncement.useMutation(
+  const { mutate, isPending } = api.announcement.createAnnouncement.useMutation(
     {
       onSuccess: () => {
         setMessage("");
@@ -49,7 +49,7 @@ export default function NewAnnouncementForm() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <Button className="mt-2 w-full" isLoading={isLoading}>
+        <Button className="mt-2 w-full" isLoading={isPending}>
           Submit
         </Button>
       </form>
