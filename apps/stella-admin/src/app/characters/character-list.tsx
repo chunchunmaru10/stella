@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { useRouter } from "next-nprogress-bar";
 import { Character } from "database";
 import { Button } from "@/components/ui/button";

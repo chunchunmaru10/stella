@@ -28,6 +28,10 @@ export default function Sidenav() {
       href: "/announcements",
       text: "Announcements",
     },
+    {
+      href: "/batch-update",
+      text: "Batch Update",
+    },
   ];
 
   return (

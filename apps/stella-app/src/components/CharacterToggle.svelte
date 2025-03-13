@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { settings } from '$lib/stores/settings';
-	import type { Character } from '.prisma/client';
+	import type { Character } from '@prisma/client';
 
 	export let character: Character;
 	let active = !$settings.excludedCharacters.includes(character.name);

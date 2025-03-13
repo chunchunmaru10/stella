@@ -1,6 +1,6 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import { unstable_httpBatchStreamLink } from "@trpc/client";
 import { useState } from "react";
 import { api } from "./client";
 import { getUrl, transformer } from "./shared";
@@ -23,7 +23,7 @@ export default function TRPCProvider({
   const [trpcClient] = useState(() =>
     api.createClient({
       links: [
-        httpBatchLink({
+        unstable_httpBatchStreamLink({
           url: getUrl(),
         }),
       ],
