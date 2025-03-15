@@ -1,11 +1,11 @@
 "use client";
 
-import ConfirmDeleteDialog from "@/components/confirm-delete-dialog";
 import TableCellInput from "@/components/table-cell-input";
 import ThumbnailInput from "@/components/thumbnail-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { InputWithLabel } from "@/components/ui/input";
+import { InputTags } from "@/components/ui/input-tags";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -33,6 +33,9 @@ type Props = {
 export default function StatForm({ existingStat, allRarities }: Props) {
   const router = useRouter();
   const [name, setName] = useState(existingStat?.name ?? "");
+  const [alternativeNames, setAlternativeNames] = useState<string[]>(
+    existingStat?.alternateNames ?? [],
+  );
   const [thumbnailUrl, setThumbnailUrl] = useState(
     existingStat?.thumbnail ?? "",
   );
@@ -135,6 +138,7 @@ export default function StatForm({ existingStat, allRarities }: Props) {
 
       editStat({
         name,
+        alternativeNames,
         thumbnail: thumbnailUrl,
         sortOrder,
         showPercentage,
@@ -174,8 +178,8 @@ export default function StatForm({ existingStat, allRarities }: Props) {
       </div>
       <form className="mt-4 flex flex-col gap-6 px-2">
         <InputWithLabel
-          label="Character Name"
-          id="characterName"
+          label="Stat Name"
+          id="statName"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -235,6 +239,18 @@ export default function StatForm({ existingStat, allRarities }: Props) {
             </div>
             <p>Substat</p>
           </Card>
+        </div>
+        <div>
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="alternativeNames">Alternative Names</Label>
+            <InputTags
+              id="alternativeNames"
+              type="text"
+              value={alternativeNames}
+              onChange={setAlternativeNames}
+              placeholder="Alternative Name"
+            />
+          </div>
         </div>
         {showMainStatTable && (
           <>

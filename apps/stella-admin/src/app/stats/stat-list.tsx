@@ -5,7 +5,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
@@ -13,16 +12,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next-nprogress-bar";
 import { Input } from "@/components/ui/input";
-import {
-  ArrowDownNarrowWide,
-  ArrowUpNarrowWide,
-  Check,
-  Plus,
-  Search,
-  X,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Check, Search, X } from "lucide-react";
 import { inferRouterOutputs } from "@trpc/server";
 import { AppRouter } from "@/server";
 import SortableTableHead from "@/components/sortable-table-head";
@@ -104,11 +94,6 @@ export default function StatList({
             size={16}
           />
         </div>
-        <Button asChild>
-          <Link href="/stats/add">
-            <Plus size={16} /> <span className="ml-2">Add New</span>
-          </Link>
-        </Button>
       </div>
       <Table className="mt-4">
         <TableHeader>

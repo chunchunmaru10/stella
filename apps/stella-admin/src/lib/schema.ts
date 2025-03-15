@@ -80,6 +80,9 @@ export const setSchema = z.object({
 
 export const statSchema = z.object({
   name: z.string().min(1, "Stat name is required"),
+  alternativeNames: z.array(
+    z.string().min(1, "Alternative name must not be empty"),
+  ),
   thumbnail: z
     .string()
     .min(1, "Thumbnail is required")

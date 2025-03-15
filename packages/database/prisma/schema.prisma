@@ -28,6 +28,7 @@ model Set {
 
 model Stat {
   name               String              @id
+  alternateNames     String[]
   thumbnail          String
   sortOrder          Int
   canBeSubstats      Boolean

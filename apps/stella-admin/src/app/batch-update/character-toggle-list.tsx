@@ -140,6 +140,7 @@ export default function CharacterToggleList({
                         alt={character.name}
                         width={40}
                         height={40}
+                        className="h-auto w-auto"
                       />
                     </div>
                     <p>{character.name}</p>

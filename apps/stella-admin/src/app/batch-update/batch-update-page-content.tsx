@@ -3,6 +3,8 @@ import { Character } from "database";
 import CharacterToggleList from "./character-toggle-list";
 import { useState } from "react";
 import ScrapeData from "./scrape-data";
+import { ParsedPrydwenCharacter } from "@/lib/types";
+import VerifyUpdate from "./verify-update";
 
 export default function BatchUpdatePageContent({
   characters,
@@ -15,9 +17,11 @@ export default function BatchUpdatePageContent({
     "Verify Update",
     "Complete",
   ] as const;
-  const [stage, setStage] =
-    useState<(typeof stages)[number]>("Select Characters");
+  const [stage, setStage] = useState<(typeof stages)[number]>("Verify Update");
   const [selectedCharacters, setSelectedCharacters] = useState(characters);
+  const [parsedCharacters, setParsedCharacters] = useState<
+    ParsedPrydwenCharacter[]
+  >([]);
 
   return (
     <>
@@ -34,7 +38,16 @@ export default function BatchUpdatePageContent({
         <ScrapeData
           selectedCharacters={selectedCharacters}
           setPreviousStage={() => setStage("Select Characters")}
-          setNextStage={() => setStage("Verify Update")}
+          onDone={(parsedCharacters) => {
+            setStage("Verify Update");
+            setParsedCharacters(parsedCharacters);
+          }}
+        />
+      )}
+      {stage === "Verify Update" && (
+        <VerifyUpdate
+          parsedCharacters={parsedCharacters}
+          backToSelectCharactersStage={() => setStage("Select Characters")}
         />
       )}
     </>

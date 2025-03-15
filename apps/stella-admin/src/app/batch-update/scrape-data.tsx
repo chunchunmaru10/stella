@@ -1,42 +1,87 @@
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ParsedPrydwenCharacter } from "@/lib/types";
+import { formatZodError } from "@/lib/utils";
 import { api } from "@/trpc/client";
 import { Character } from "database";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function ScrapeData({
   selectedCharacters,
   setPreviousStage,
-  setNextStage,
+  onDone,
 }: {
   selectedCharacters: Character[];
   setPreviousStage: () => void;
-  setNextStage: () => void;
+  onDone: (parsedCharacters: ParsedPrydwenCharacter[]) => void;
 }) {
+  const logTypes = ["info", "error", "success"] as const;
   const [shouldCheckNewCharacters, setShouldCheckNewCharacters] =
     useState(false);
+  const [logFilter, setLogFilters] = useState<(typeof logTypes)[number][]>([
+    ...logTypes,
+  ]);
+  const [isDone, setIsDone] = useState(false);
   const [batchEnabled, setBatchEnabled] = useState(false);
-  const { data } = api.character.batchUpdateCharacters.useQuery(
-    {
-      shouldCheckForNewCharacters: shouldCheckNewCharacters,
-      characters: selectedCharacters.map((c) => c.name),
-    },
-    {
-      enabled: batchEnabled,
-    },
-  );
+  const [parsedCharacters, setParsedCharacters] = useState<
+    ParsedPrydwenCharacter[]
+  >([]);
+  const [logs, setLogs] = useState<
+    { message: string; type: (typeof logTypes)[number] }[]
+  >([]);
+
+  const { data: iterable, error } =
+    api.character.batchUpdateCharacters.useQuery(
+      {
+        shouldCheckForNewCharacters: shouldCheckNewCharacters,
+        characters: selectedCharacters.map((c) => c.name),
+      },
+      {
+        enabled: batchEnabled,
+        retry: false,
+      },
+    );
+
+  const bottomDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!batchEnabled) return;
+    if (!batchEnabled || (!iterable?.length && !error)) return;
 
-    console.log(data);
-  }, [data]);
+    const logsToPush: typeof logs = [];
+    for (const data of iterable ?? []) {
+      if (data.done) {
+        setIsDone(true);
+        setParsedCharacters(data.data);
+        break;
+      }
+
+      logsToPush.push(data.data);
+    }
+
+    if (error) {
+      setIsDone(true);
+      let message = formatZodError(error.data?.zodError);
+      if (!message) message = error.message;
+
+      logsToPush.push({
+        message,
+        type: "error",
+      });
+    }
+
+    setLogs(logsToPush);
+  }, [iterable, error]);
+
+  useEffect(() => {
+    bottomDivRef.current?.scrollIntoView();
+  }, [logs]);
 
   return (
     <>
-      {!batchEnabled || !data ? (
+      {!batchEnabled || !iterable ? (
         <>
           {selectedCharacters.length === 0 ? (
             <p>
@@ -58,6 +103,7 @@ export default function ScrapeData({
                           alt={character.name}
                           width={40}
                           height={40}
+                          className="h-auto w-auto"
                         />
                       </div>
                       <span>{character.name}</span>
@@ -93,10 +139,51 @@ export default function ScrapeData({
         </>
       ) : (
         <>
-          <div>
-            {data.map((d) => (
-              <pre key={d}>{d}</pre>
+          <div className="mb-4 flex w-full flex-wrap gap-2">
+            {logTypes.map((type) => (
+              <Card
+                key={type}
+                className="flex flex-1 items-center space-x-4 p-4"
+              >
+                <Switch
+                  id={type + "Switch"}
+                  checked={logFilter.includes(type)}
+                  onCheckedChange={(checked) => {
+                    if (checked) setLogFilters((prev) => [...prev, type]);
+                    else
+                      setLogFilters((prev) => prev.filter((t) => t !== type));
+                  }}
+                />
+                <Label htmlFor={type + "Switch"}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Label>
+              </Card>
             ))}
+          </div>
+          <div className="max-h-[40vh] overflow-y-auto rounded-md border border-primary-foreground p-4 pb-6 scrollbar-thin md:max-h-[70vh]">
+            {logs
+              .filter((l) => logFilter.includes(l.type))
+              .map((log, i) => (
+                <pre
+                  key={i}
+                  className={`${log.type === "info" ? "text-primary" : log.type === "success" ? "text-green-500" : "text-red-500"} text-wrap`}
+                >
+                  {log.message}
+                </pre>
+              ))}
+            <div ref={bottomDivRef} />
+          </div>
+          <div className="mt-4 flex w-full flex-wrap justify-end gap-4">
+            {(error || (!parsedCharacters.length && isDone)) && (
+              <Button variant="outline" onClick={setPreviousStage}>
+                Back to Select Characters
+              </Button>
+            )}
+            {parsedCharacters.length && isDone ? (
+              <Button onClick={() => onDone(parsedCharacters)}>
+                Proceed to Verify Update
+              </Button>
+            ) : null}
           </div>
         </>
       )}

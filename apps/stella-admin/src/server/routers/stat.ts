@@ -57,6 +57,7 @@ export const statRouter = router({
       await db.stat.update({
         data: {
           name: input.name,
+          alternateNames: input.alternativeNames,
           thumbnail: imageUrl,
           sortOrder: input.sortOrder,
           displayPercentage: input.showPercentage,
