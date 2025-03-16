@@ -57,7 +57,11 @@ export const editCharacterSchema = characterSchema.extend({
   originalName: z.string().min(1, "Original name is required."),
 });
 
-export const batchUpdateCharacterSchema = z.array(editCharacterSchema);
+export const batchUpdateCharacterSchema = z.array(
+  editCharacterSchema.extend({
+    lastAutoRun: z.date().optional(),
+  }),
+);
 
 export const setSchema = z.object({
   name: z.string().min(1, { message: "Set name is required" }),

@@ -14,9 +14,13 @@ type Status = "added" | "remain" | "deleted";
 export default function CharacterCompareCard({
   existingCharacter,
   removeCharacter,
+  willUpdateApply,
+  toggle,
 }: {
   existingCharacter: ParsedPrydwenCharacter & { old: CharacterFull };
   removeCharacter: () => void;
+  willUpdateApply: boolean;
+  toggle: () => void;
 }) {
   const { mutate: updateSingleCharacter, isPending } =
     api.character.batchEditCharacters.useMutation({
@@ -189,7 +193,7 @@ export default function CharacterCompareCard({
   }
 
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center">
           <Image
@@ -217,30 +221,32 @@ export default function CharacterCompareCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-8">
-        <div>
-          <p>Updated Sets: </p>
-          <ul>
-            {updatedSets.map((set) => (
-              <li
-                key={set.name}
-                className={`${getTextColor(set.status)} flex items-center gap-2`}
-              >
-                {getIcon(set.status)}
-                <span>{set.name}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <p>Updated Main Stats:</p>
-          <ul className="list-inside list-disc">
-            {Object.keys(updatedMainStats).map((type) => (
-              <li key={type}>
-                {type}
-                <ul className="ml-4">
-                  {updatedMainStats[type as keyof typeof updatedMainStats].map(
-                    (stat) => (
+      <CardContent className="flex flex-1 flex-col justify-between gap-8">
+        <div className="flex flex-wrap gap-8">
+          <div>
+            <p>Updated Sets: </p>
+            <ul>
+              {updatedSets.map((set) => (
+                <li
+                  key={set.name}
+                  className={`${getTextColor(set.status)} flex items-center gap-2`}
+                >
+                  {getIcon(set.status)}
+                  <span>{set.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p>Updated Main Stats:</p>
+            <ul className="list-inside list-disc">
+              {Object.keys(updatedMainStats).map((type) => (
+                <li key={type}>
+                  {type}
+                  <ul className="ml-4">
+                    {updatedMainStats[
+                      type as keyof typeof updatedMainStats
+                    ].map((stat) => (
                       <li
                         key={stat.name}
                         className={`${getTextColor(stat.status)} flex items-center gap-2`}
@@ -248,73 +254,81 @@ export default function CharacterCompareCard({
                         {getIcon(stat.status)}
                         <span>{stat.name}</span>
                       </li>
-                    ),
-                  )}
-                </ul>
-              </li>
-            ))}
-          </ul>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p>Updated Substats:</p>
+            <ul>
+              {updatedSubstats.map((level) => (
+                <li key={level.priority} className={getTextColor(level.status)}>
+                  <div className="flex items-center gap-2">
+                    {getIcon(level.status)}
+                    <span>Priority {level.priority}</span>
+                  </div>
+                  <ul className="ml-4">
+                    {level.substats.map((stat) => (
+                      <li
+                        key={stat.name}
+                        className={`${getTextColor(stat.status)} flex items-center gap-2`}
+                      >
+                        {getIcon(stat.status)}
+                        <span>{stat.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div>
-          <p>Updated Substats:</p>
-          <ul>
-            {updatedSubstats.map((level) => (
-              <li key={level.priority} className={getTextColor(level.status)}>
-                <div className="flex items-center gap-2">
-                  {getIcon(level.status)}
-                  <span>Priority {level.priority}</span>
-                </div>
-                <ul className="ml-4">
-                  {level.substats.map((stat) => (
-                    <li
-                      key={stat.name}
-                      className={`${getTextColor(stat.status)} flex items-center gap-2`}
-                    >
-                      {getIcon(stat.status)}
-                      <span>{stat.name}</span>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="flex-1" onClick={toggle}>
+            {willUpdateApply
+              ? "Exclude From Apply List"
+              : "Include in Apply List"}
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={() => {
+              updateSingleCharacter([
+                {
+                  name: existingCharacter.old.name,
+                  thumbnail: existingCharacter.old.thumbnail,
+                  rarity: existingCharacter.old.rarity,
+                  releaseDate: existingCharacter.old.releaseDate,
+                  sets: existingCharacter.sets,
+                  mainStats: Object.keys(existingCharacter.mainStats)
+                    .map((key) =>
+                      existingCharacter.mainStats[
+                        key as keyof typeof existingCharacter.mainStats
+                      ].map((stat) => ({
+                        type: key,
+                        stat: stat,
+                      })),
+                    )
+                    .flat(),
+                  subStats: existingCharacter.substats
+                    .map((priority, i) =>
+                      priority.map((stat) => ({
+                        stat,
+                        priority: i + 1,
+                      })),
+                    )
+                    .flat(),
+                  originalName: existingCharacter.old.name,
+                  lastAutoRun: new Date(),
+                },
+              ]);
+            }}
+            isLoading={isPending}
+          >
+            Update
+          </Button>
         </div>
-        <Button
-          className="w-full"
-          onClick={() => {
-            updateSingleCharacter([
-              {
-                name: existingCharacter.old.name,
-                thumbnail: existingCharacter.old.thumbnail,
-                rarity: existingCharacter.old.rarity,
-                releaseDate: existingCharacter.old.releaseDate,
-                sets: existingCharacter.sets,
-                mainStats: Object.keys(existingCharacter.mainStats)
-                  .map((key) =>
-                    existingCharacter.mainStats[
-                      key as keyof typeof existingCharacter.mainStats
-                    ].map((stat) => ({
-                      type: key,
-                      stat: stat,
-                    })),
-                  )
-                  .flat(),
-                subStats: existingCharacter.substats
-                  .map((priority, i) =>
-                    priority.map((stat) => ({
-                      stat,
-                      priority: i + 1,
-                    })),
-                  )
-                  .flat(),
-                originalName: existingCharacter.old.name,
-              },
-            ]);
-          }}
-          isLoading={isPending}
-        >
-          Update
-        </Button>
       </CardContent>
     </Card>
   );

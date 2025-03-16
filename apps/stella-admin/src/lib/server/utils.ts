@@ -73,7 +73,7 @@ export async function uploadImageFromExternalURL(
 
     const blob = await res.blob();
     const file = new File([blob], "", { type: blob.type });
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
+    if (!["image/png", "image/jpeg", "image/webp", ""].includes(file.type))
       throw new Error("Invalid file type. Must be png, jpeg, or webp");
 
     const fileRef = ref(firebaseStorage, path);
@@ -227,6 +227,7 @@ export async function batchUpdateCharacters(
                 skipDuplicates: true,
               },
             },
+            lastAutoRunAt: input.lastAutoRun,
           },
           where: {
             name: input.originalName,
