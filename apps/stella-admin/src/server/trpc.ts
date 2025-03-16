@@ -17,6 +17,9 @@ const t = initTRPC.create({
       },
     };
   },
+  jsonl: {
+    pingMs: 1000,
+  },
 });
 
 export const router = t.router;
