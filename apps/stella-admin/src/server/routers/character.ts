@@ -475,7 +475,7 @@ export const characterRouter = router({
               (s) => s.name === substat || s.alternateNames.includes(substat),
             );
 
-            if (!!foundSubstats.length) {
+            if (!foundSubstats.length) {
               yield message.error(
                 `Skipped adding ${substat} to ${characterCard.name}'s substat priority ${i + 1} list because it couldn't be found in the database.`,
               );
