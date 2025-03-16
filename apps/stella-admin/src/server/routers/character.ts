@@ -1,4 +1,5 @@
 import {
+  batchAddCharacterSchema,
   batchUpdateCharacterSchema,
   characterSchema,
   editCharacterSchema,
@@ -7,6 +8,7 @@ import { db } from "database";
 import { procedure, router } from "../trpc";
 import { z } from "zod";
 import {
+  batchAddCharacters,
   batchUpdateCharacters,
   deleteImage,
   uploadImageFromExternalURL,
@@ -44,50 +46,13 @@ export const characterRouter = router({
     });
   }),
   addCharacter: procedure.input(characterSchema).mutation(async ({ input }) => {
-    const existing = await db.character.findFirst({
-      where: {
-        name: input.name,
-      },
-    });
-
-    if (existing)
-      throw new Error("Another character with this name already exists");
-
-    const imageUrl = await uploadImageFromExternalURL(
-      input.thumbnail,
-      `characters/${input.name}`,
-    );
-
-    await db.character.create({
-      data: {
-        name: input.name,
-        thumbnail: imageUrl,
-        rarity: input.rarity,
-        releaseDate: input.releaseDate,
-        sets: {
-          connect: input.sets.map((set) => ({
-            name: set,
-          })),
-        },
-        characterMainStats: {
-          createMany: {
-            data: input.mainStats.map(({ stat, type }) => ({
-              statName: stat,
-              typeName: type,
-            })),
-          },
-        },
-        characterSubstats: {
-          createMany: {
-            data: input.subStats.map(({ stat, priority }) => ({
-              statName: stat,
-              priority,
-            })),
-          },
-        },
-      },
-    });
+    await batchAddCharacters([input]);
   }),
+  batchAddCharacters: procedure
+    .input(batchAddCharacterSchema)
+    .mutation(async ({ input }) => {
+      await batchAddCharacters(input);
+    }),
   editCharacter: procedure
     .input(editCharacterSchema)
     .mutation(async ({ input }) => {

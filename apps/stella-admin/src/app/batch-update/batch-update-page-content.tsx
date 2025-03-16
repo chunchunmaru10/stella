@@ -10,13 +10,8 @@ export default function BatchUpdatePageContent({
 }: {
   characters: CharacterFull[];
 }) {
-  const stages = [
-    "Select Characters",
-    "Scrape Data",
-    "Verify Update",
-    "Complete",
-  ] as const;
-  const [stage, setStage] = useState<(typeof stages)[number]>(stages[2]);
+  const stages = ["Select Characters", "Scrape Data", "Verify Update"] as const;
+  const [stage, setStage] = useState<(typeof stages)[number]>(stages[0]);
   const [selectedCharacters, setSelectedCharacters] = useState(characters);
   const [parsedCharacters, setParsedCharacters] = useState<
     ParsedPrydwenCharacter[]

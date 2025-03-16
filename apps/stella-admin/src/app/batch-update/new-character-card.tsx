@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ParsedPrydwenCharacter } from "@/lib/types";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ThumbnailInput from "@/components/thumbnail-input";
@@ -23,13 +23,29 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { api } from "@/trpc/client";
 import { toast } from "@/components/ui/use-toast";
+import { z } from "zod";
+import { characterSchema } from "@/lib/schema";
+
+type NewCharacter = ParsedPrydwenCharacter & {
+  thumbnailUrl: string;
+  rarity: number;
+  releaseDate: Date | undefined;
+};
 
 export default function NewCharacterCard({
   newCharacter,
   removeCharacter,
+  setToAdd,
+  isLoading,
+  convertPrydwenCharToAddSchema,
 }: {
-  newCharacter: ParsedPrydwenCharacter;
+  newCharacter: NewCharacter;
   removeCharacter: () => void;
+  setToAdd: Dispatch<SetStateAction<NewCharacter[]>>;
+  isLoading: boolean;
+  convertPrydwenCharToAddSchema: (
+    prydwenChar: NewCharacter,
+  ) => z.infer<typeof characterSchema>;
 }) {
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [rarity, setRarity] = useState(5);
@@ -51,6 +67,20 @@ export default function NewCharacterCard({
         });
       },
     });
+
+  useEffect(() => {
+    setToAdd((prev) => {
+      const found = prev.find((c) => c.name === newCharacter.name);
+
+      if (found) {
+        found.thumbnailUrl = thumbnailUrl;
+        found.rarity = rarity;
+        found.releaseDate = releaseDate;
+      }
+
+      return [...prev];
+    });
+  }, [thumbnailUrl, rarity, releaseDate]);
 
   return (
     <Card>
@@ -203,33 +233,9 @@ export default function NewCharacterCard({
               return;
             }
 
-            addCharacter({
-              name: newCharacter.name,
-              thumbnail: thumbnailUrl,
-              rarity,
-              releaseDate,
-              sets: newCharacter.sets,
-              mainStats: Object.keys(newCharacter.mainStats)
-                .map((slot) =>
-                  newCharacter.mainStats[
-                    slot as keyof typeof newCharacter.mainStats
-                  ].map((stat) => ({
-                    type: slot,
-                    stat,
-                  })),
-                )
-                .flat(),
-              subStats: newCharacter.substats
-                .map((stats, i) =>
-                  stats.map((stat) => ({
-                    priority: i + 1,
-                    stat,
-                  })),
-                )
-                .flat(),
-            });
+            addCharacter(convertPrydwenCharToAddSchema(newCharacter));
           }}
-          isLoading={isPending}
+          isLoading={isPending || isLoading}
         >
           Add
         </Button>

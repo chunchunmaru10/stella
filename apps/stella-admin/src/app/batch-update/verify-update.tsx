@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import type { CharacterFull, ParsedPrydwenCharacter } from "@/lib/types";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import CharacterCompareCard from "./character-compare-card";
 import NewCharacterCard from "./new-character-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { api } from "@/trpc/client";
+import { formatZodError } from "@/lib/utils";
+import { toast } from "@/components/ui/use-toast";
+import React from "react";
 
 export default function VerifyUpdate({
   allCharacters,
@@ -22,18 +26,162 @@ export default function VerifyUpdate({
     const existingCharacters: (ParsedPrydwenCharacter & {
       old: CharacterFull;
     })[] = [];
-    const newCharacters: ParsedPrydwenCharacter[] = [];
+    const newCharacters: (ParsedPrydwenCharacter & {
+      thumbnailUrl: string;
+      rarity: number;
+      releaseDate: Date | undefined;
+    })[] = [];
 
     for (const char of parsedCharacters) {
       const foundChar = allCharacters.find((c) => c.name === char.name);
       if (foundChar) existingCharacters.push({ ...char, old: foundChar });
-      else newCharacters.push(char);
+      else
+        newCharacters.push({
+          ...char,
+          thumbnailUrl: "",
+          rarity: 5,
+          releaseDate: undefined,
+        });
     }
 
     return { existingCharacters, newCharacters };
   }, [parsedCharacters]);
+
+  // need these use effects, otherwise when updating/adding single character, the toggle all checkbox on/off button will display incorrectly.
+  useEffect(() => {
+    setToUpdate((prev) =>
+      prev.filter(
+        (updateChar) =>
+          !!existingCharacters.find((c) => c.name === updateChar.name),
+      ),
+    );
+  }, [existingCharacters]);
+
+  useEffect(() => {
+    setToAdd((prev) =>
+      prev.filter(
+        (newChar) => !!existingCharacters.find((c) => c.name === newChar.name),
+      ),
+    );
+  }, [newCharacters]);
+
   const [toUpdate, setToUpdate] = useState(existingCharacters);
   const [toAdd, setToAdd] = useState(newCharacters);
+  const { mutate: batchEdit, isPending: isBatchEditPending } =
+    api.character.batchEditCharacters.useMutation({
+      onSuccess: () => {
+        toast({
+          description:
+            `Batch edited ${toUpdate.length} character(s) successfully. ` +
+            toAdd.length
+              ? "Proceeding to batch add. "
+              : "",
+        });
+
+        setParsedCharacters((prev) =>
+          prev.filter(
+            (c) => !toUpdate.find((updated) => updated.name === c.name),
+          ),
+        );
+
+        if (toAdd.length)
+          batchAdd(toAdd.map((c) => convertPrydwenCharToAddSchema(c)));
+      },
+      onError: (e) => {
+        let message = formatZodError(e.data?.zodError);
+        if (!message) message = e.message;
+        toast({
+          variant: "destructive",
+          description: message,
+        });
+      },
+    });
+  const { mutate: batchAdd, isPending: isBatchAddPending } =
+    api.character.batchAddCharacters.useMutation({
+      onSuccess: () => {
+        toast({
+          description: `Batch added ${toAdd.length} character(s) successfully.`,
+        });
+        setParsedCharacters((prev) =>
+          prev.filter((c) => !toAdd.find((added) => added.name === c.name)),
+        );
+      },
+      onError: (e) => {
+        let message = formatZodError(e.data?.zodError);
+        if (!message) message = e.message;
+        toast({
+          variant: "destructive",
+          description: message,
+        });
+      },
+    });
+
+  function convertPrydwenCharToEditSchema(
+    prydwenChar: (typeof existingCharacters)[number],
+  ) {
+    return {
+      name: prydwenChar.old.name,
+      thumbnail: prydwenChar.old.thumbnail,
+      rarity: prydwenChar.old.rarity,
+      releaseDate: prydwenChar.old.releaseDate,
+      sets: prydwenChar.sets,
+      mainStats: Object.keys(prydwenChar.mainStats)
+        .map((key) =>
+          prydwenChar.mainStats[key as keyof typeof prydwenChar.mainStats].map(
+            (stat) => ({
+              type: key,
+              stat: stat,
+            }),
+          ),
+        )
+        .flat(),
+      subStats: prydwenChar.substats
+        .map((priority, i) =>
+          priority.map((stat) => ({
+            stat,
+            priority: i + 1,
+          })),
+        )
+        .flat(),
+      originalName: prydwenChar.old.name,
+      lastAutoRun: new Date(),
+    };
+  }
+
+  function convertPrydwenCharToAddSchema(
+    prydwenChar: (typeof newCharacters)[number],
+  ) {
+    // THIS SHOULD NOT HAPPEN, THE FUNCION CALLING THIS SHOULD CHECK IF RELEASE DATE IS EMPTY, THIS THROW IS JUST FOR ENFORCING TYPE
+    if (!prydwenChar.releaseDate) {
+      throw new Error(`${prydwenChar.name} is missing release date.`);
+    }
+
+    return {
+      name: prydwenChar.name,
+      thumbnail: prydwenChar.thumbnailUrl,
+      rarity: prydwenChar.rarity,
+      releaseDate: prydwenChar.releaseDate,
+      sets: prydwenChar.sets,
+      mainStats: Object.keys(prydwenChar.mainStats)
+        .map((slot) =>
+          prydwenChar.mainStats[slot as keyof typeof prydwenChar.mainStats].map(
+            (stat) => ({
+              type: slot,
+              stat,
+            }),
+          ),
+        )
+        .flat(),
+      subStats: prydwenChar.substats
+        .map((stats, i) =>
+          stats.map((stat) => ({
+            priority: i + 1,
+            stat,
+          })),
+        )
+        .flat(),
+    };
+  }
 
   return (
     <>
@@ -88,12 +236,62 @@ export default function VerifyUpdate({
                       }}
                     />
                     <Label htmlFor={`${char.name}-batch-apply`}>
-                      {char.name}
+                      {char.name} {char.isNew ? "(New)" : ""}
                     </Label>
                   </div>
                 ))}
               </div>
-              <Button className="mt-4 w-full">Apply</Button>
+              <Button
+                className="mt-4 w-full"
+                variant="outline"
+                onClick={() => {
+                  if (
+                    toUpdate.length === existingCharacters.length &&
+                    toAdd.length === newCharacters.length
+                  ) {
+                    setToUpdate([]);
+                    setToAdd([]);
+                  } else {
+                    setToUpdate(existingCharacters);
+                    setToAdd(newCharacters);
+                  }
+                }}
+              >
+                {toUpdate.length === existingCharacters.length &&
+                toAdd.length === newCharacters.length
+                  ? "Toggle Off"
+                  : "Toggle On"}
+              </Button>
+              <Button
+                className="mt-4 w-full"
+                isLoading={isBatchEditPending || isBatchAddPending}
+                onClick={() => {
+                  // check if all new character data has been filled in
+                  for (const addChar of toAdd) {
+                    if (!addChar.thumbnailUrl) {
+                      toast({
+                        description: `New character ${addChar.name} is missing thumbnail URL.`,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+
+                    if (!addChar.releaseDate) {
+                      toast({
+                        description: `New character ${addChar.releaseDate} is missing release date.`,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  }
+
+                  batchEdit(
+                    toUpdate.map((c) => convertPrydwenCharToEditSchema(c)),
+                  );
+                }}
+              >
+                Apply
+              </Button>
             </CardContent>
           </Card>
           <div className="pb-4">
@@ -109,6 +307,11 @@ export default function VerifyUpdate({
                         setParsedCharacters((prev) =>
                           prev.filter((c) => c.name !== newCharacter.name),
                         )
+                      }
+                      setToAdd={setToAdd}
+                      isLoading={isBatchAddPending || isBatchEditPending}
+                      convertPrydwenCharToAddSchema={
+                        convertPrydwenCharToAddSchema
                       }
                     />
                   ))}
@@ -155,6 +358,10 @@ export default function VerifyUpdate({
                           setToUpdate((prev) => [...prev, found]);
                         }
                       }}
+                      isLoading={isBatchEditPending || isBatchAddPending}
+                      convertPrydwenCharToEditSchema={
+                        convertPrydwenCharToEditSchema
+                      }
                     />
                   ))}
                 </div>

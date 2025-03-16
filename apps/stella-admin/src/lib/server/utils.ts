@@ -6,7 +6,11 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
-import { batchUpdateCharacterSchema, setSchema } from "../schema";
+import {
+  batchUpdateCharacterSchema,
+  batchAddCharacterSchema,
+  setSchema,
+} from "../schema";
 import { z } from "zod";
 import { Type } from "database";
 import { api } from "@/trpc/server";
@@ -117,6 +121,60 @@ export async function validateSet(set: z.infer<typeof setSchema>) {
 
   if (remainingTypes.length !== 0)
     throw new Error(`Invalid piece type. ${remainingTypes[0].name} is missing`);
+}
+
+export async function batchAddCharacters(
+  characters: z.infer<typeof batchAddCharacterSchema>,
+) {
+  db.$transaction(async (tx) => {
+    await Promise.all(
+      characters.map(async (input) => {
+        const existing = await db.character.findFirst({
+          where: {
+            name: input.name,
+          },
+        });
+
+        if (existing)
+          throw new Error("Another character with this name already exists");
+
+        const imageUrl = await uploadImageFromExternalURL(
+          input.thumbnail,
+          `characters/${input.name}`,
+        );
+
+        await db.character.create({
+          data: {
+            name: input.name,
+            thumbnail: imageUrl,
+            rarity: input.rarity,
+            releaseDate: input.releaseDate,
+            sets: {
+              connect: input.sets.map((set) => ({
+                name: set,
+              })),
+            },
+            characterMainStats: {
+              createMany: {
+                data: input.mainStats.map(({ stat, type }) => ({
+                  statName: stat,
+                  typeName: type,
+                })),
+              },
+            },
+            characterSubstats: {
+              createMany: {
+                data: input.subStats.map(({ stat, priority }) => ({
+                  statName: stat,
+                  priority,
+                })),
+              },
+            },
+          },
+        });
+      }),
+    );
+  });
 }
 
 export async function batchUpdateCharacters(
@@ -233,6 +291,7 @@ export async function batchUpdateCharacters(
             name: input.originalName,
           },
         });
+        console.log(`finish update ${input.originalName}.`);
 
         if (input.name !== originalCharacter.name)
           await deleteImage(`characters/${originalCharacter.name}`);

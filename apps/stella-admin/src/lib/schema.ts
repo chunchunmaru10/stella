@@ -53,6 +53,10 @@ export const characterSchema = z.object({
     .min(1, { message: "Substats is required" }),
 });
 
+export const batchAddCharacterSchema = z
+  .array(characterSchema)
+  .min(1, "At least 1 character is required.");
+
 export const editCharacterSchema = characterSchema.extend({
   originalName: z.string().min(1, "Original name is required."),
 });

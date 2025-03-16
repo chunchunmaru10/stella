@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/client";
 import { toast } from "@/components/ui/use-toast";
 import { formatZodError } from "@/lib/utils";
+import { editCharacterSchema } from "@/lib/schema";
+import { z } from "zod";
 
 type Status = "added" | "remain" | "deleted";
 
@@ -16,11 +18,17 @@ export default function CharacterCompareCard({
   removeCharacter,
   willUpdateApply,
   toggle,
+  isLoading,
+  convertPrydwenCharToEditSchema,
 }: {
   existingCharacter: ParsedPrydwenCharacter & { old: CharacterFull };
   removeCharacter: () => void;
   willUpdateApply: boolean;
   toggle: () => void;
+  isLoading: boolean;
+  convertPrydwenCharToEditSchema: (
+    prydwenChar: typeof existingCharacter,
+  ) => z.infer<typeof editCharacterSchema>;
 }) {
   const { mutate: updateSingleCharacter, isPending } =
     api.character.batchEditCharacters.useMutation({
@@ -295,36 +303,10 @@ export default function CharacterCompareCard({
             className="flex-1"
             onClick={() => {
               updateSingleCharacter([
-                {
-                  name: existingCharacter.old.name,
-                  thumbnail: existingCharacter.old.thumbnail,
-                  rarity: existingCharacter.old.rarity,
-                  releaseDate: existingCharacter.old.releaseDate,
-                  sets: existingCharacter.sets,
-                  mainStats: Object.keys(existingCharacter.mainStats)
-                    .map((key) =>
-                      existingCharacter.mainStats[
-                        key as keyof typeof existingCharacter.mainStats
-                      ].map((stat) => ({
-                        type: key,
-                        stat: stat,
-                      })),
-                    )
-                    .flat(),
-                  subStats: existingCharacter.substats
-                    .map((priority, i) =>
-                      priority.map((stat) => ({
-                        stat,
-                        priority: i + 1,
-                      })),
-                    )
-                    .flat(),
-                  originalName: existingCharacter.old.name,
-                  lastAutoRun: new Date(),
-                },
+                convertPrydwenCharToEditSchema(existingCharacter),
               ]);
             }}
-            isLoading={isPending}
+            isLoading={isPending || isLoading}
           >
             Update
           </Button>
