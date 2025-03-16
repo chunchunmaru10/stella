@@ -471,26 +471,29 @@ export const characterRouter = router({
             .filter((s) => !!s);
 
           for (const substat of substatTextSplitSecondLevel) {
-            const foundSubstat = allStats.find(
+            const foundSubstats = allStats.filter(
               (s) => s.name === substat || s.alternateNames.includes(substat),
             );
 
-            if (!foundSubstat) {
+            if (!!foundSubstats.length) {
               yield message.error(
                 `Skipped adding ${substat} to ${characterCard.name}'s substat priority ${i + 1} list because it couldn't be found in the database.`,
               );
               continue;
-            } else if (foundSubstat.name === substat) {
+            } else if (
+              foundSubstats.length === 1 &&
+              foundSubstats[0].name === substat
+            ) {
               yield message.success(
                 `Adding ${substat} to ${characterCard.name}'s substat priority ${i + 1} list.`,
               );
             } else {
               yield message.success(
-                `Could not find exact match for ${substat}, but found it as alternative name for ${foundSubstat.name}. Adding ${foundSubstat.name} to ${characterCard.name}'s priority ${i + 1} list.`,
+                `Found multiple matches for ${substat}: ${foundSubstats.map((s) => s.name).join(", ")}. Adding to ${characterCard.name}'s priority ${i + 1} list.`,
               );
             }
 
-            substatInThisLevel.push(foundSubstat.name);
+            substatInThisLevel.push(...foundSubstats.map((s) => s.name));
           }
 
           parsedCharacter.substats.push(substatInThisLevel);
