@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Character } from "database";
+import { CharacterFull } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { Search } from "lucide-react";
 import Image from "next/image";
@@ -22,9 +22,9 @@ export default function CharacterToggleList({
   setSelectedCharacters,
   onProceedClicked,
 }: {
-  characters: Character[];
-  selectedCharacters: Character[];
-  setSelectedCharacters: Dispatch<SetStateAction<Character[]>>;
+  characters: CharacterFull[];
+  selectedCharacters: CharacterFull[];
+  setSelectedCharacters: Dispatch<SetStateAction<CharacterFull[]>>;
   onProceedClicked: () => void;
 }) {
   const [filter, setFilter] = useState("");

@@ -33,17 +33,16 @@ export default function ScrapeData({
     { message: string; type: (typeof logTypes)[number] }[]
   >([]);
 
-  const { data: iterable, error } =
-    api.character.batchUpdateCharacters.useQuery(
-      {
-        shouldCheckForNewCharacters: shouldCheckNewCharacters,
-        characters: selectedCharacters.map((c) => c.name),
-      },
-      {
-        enabled: batchEnabled,
-        retry: false,
-      },
-    );
+  const { data: iterable, error } = api.character.batchFetchCharacters.useQuery(
+    {
+      shouldCheckForNewCharacters: shouldCheckNewCharacters,
+      characters: selectedCharacters.map((c) => c.name),
+    },
+    {
+      enabled: batchEnabled,
+      retry: false,
+    },
+  );
 
   const bottomDivRef = useRef<HTMLDivElement>(null);
 

@@ -1,10 +1,14 @@
-import { characterSchema } from "@/lib/schema";
-import { Set, db } from "database";
+import {
+  batchUpdateCharacterSchema,
+  characterSchema,
+  editCharacterSchema,
+} from "@/lib/schema";
+import { db } from "database";
 import { procedure, router } from "../trpc";
 import { z } from "zod";
 import {
+  batchUpdateCharacters,
   deleteImage,
-  getCharacterFull,
   uploadImageFromExternalURL,
 } from "@/lib/server/utils";
 import { NodeType, parse } from "node-html-parser";
@@ -13,6 +17,27 @@ import { ParsedPrydwenCharacter } from "@/lib/types";
 export const characterRouter = router({
   getAllCharacters: procedure.query(async () => {
     return await db.character.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
+  }),
+  getAllCharactersFull: procedure.query(async () => {
+    return await db.character.findMany({
+      include: {
+        sets: true,
+        characterMainStats: {
+          include: {
+            stat: true,
+            type: true,
+          },
+        },
+        characterSubstats: {
+          include: {
+            stat: true,
+          },
+        },
+      },
       orderBy: {
         name: "asc",
       },
@@ -64,117 +89,14 @@ export const characterRouter = router({
     });
   }),
   editCharacter: procedure
-    .input(
-      characterSchema.extend({
-        originalName: z
-          .string()
-          .min(1, { message: "Original name is required." }),
-      }),
-    )
+    .input(editCharacterSchema)
     .mutation(async ({ input }) => {
-      const originalCharacter = await getCharacterFull(input.originalName);
-
-      if (!originalCharacter)
-        throw new Error(`Cannot find ${input.originalName} to edit.`);
-
-      let imageUrl = originalCharacter.thumbnail;
-      // reupload image if either name or thumbnail url is different
-      // if name different, delete the old file with that name later
-      if (
-        originalCharacter.name !== input.name ||
-        originalCharacter.thumbnail !== input.thumbnail
-      ) {
-        imageUrl = await uploadImageFromExternalURL(
-          input.thumbnail,
-          `characters/${input.name}`,
-        );
-      }
-
-      // if new does not contain original, means its new
-      // if original does not contain new, means its deleted
-      const newSets = input.sets.filter(
-        (newSet) => !originalCharacter.sets.find((ori) => ori.name === newSet),
-      );
-      const removedSets = originalCharacter.sets.filter(
-        (ori) => !input.sets.includes(ori.name),
-      );
-
-      const newMainStats = input.mainStats.filter(
-        (newStats) =>
-          !originalCharacter.characterMainStats.find(
-            (ori) =>
-              ori.statName === newStats.stat && ori.typeName === newStats.type,
-          ),
-      );
-      const removedMainStats = originalCharacter.characterMainStats.filter(
-        (ori) =>
-          !input.mainStats.find(
-            (stat) => stat.stat === ori.statName && stat.type === ori.typeName,
-          ),
-      );
-
-      // even if priority changed, we count that as different stat (remove and add back in)
-      const newSubstats = input.subStats.filter(
-        (stat) =>
-          !originalCharacter.characterSubstats.find(
-            (ori) =>
-              ori.statName === stat.stat && ori.priority === stat.priority,
-          ),
-      );
-      const removedSubstats = originalCharacter.characterSubstats.filter(
-        (ori) =>
-          !input.subStats.find(
-            (stat) =>
-              stat.stat === ori.statName && stat.priority === ori.priority,
-          ),
-      );
-
-      await db.character.update({
-        data: {
-          name: input.name,
-          thumbnail: imageUrl,
-          rarity: input.rarity,
-          releaseDate: input.releaseDate,
-          sets: {
-            disconnect: removedSets.map((set) => ({ name: set.name })),
-            connect: newSets.map((set) => ({
-              name: set,
-            })),
-          },
-          characterMainStats: {
-            deleteMany: removedMainStats.map((stat) => ({
-              statName: stat.statName,
-              typeName: stat.typeName,
-            })),
-            createMany: {
-              data: newMainStats.map((stat) => ({
-                statName: stat.stat,
-                typeName: stat.type,
-              })),
-              skipDuplicates: true,
-            },
-          },
-          characterSubstats: {
-            deleteMany: removedSubstats.map((stat) => ({
-              statName: stat.statName,
-              priority: stat.priority,
-            })),
-            createMany: {
-              data: newSubstats.map((stat) => ({
-                statName: stat.stat,
-                priority: stat.priority,
-              })),
-              skipDuplicates: true,
-            },
-          },
-        },
-        where: {
-          name: input.originalName,
-        },
-      });
-
-      if (input.name !== originalCharacter.name)
-        await deleteImage(`characters/${originalCharacter.name}`);
+      await batchUpdateCharacters([input]);
+    }),
+  batchEditCharacters: procedure
+    .input(batchUpdateCharacterSchema)
+    .mutation(async ({ input }) => {
+      await batchUpdateCharacters(input);
     }),
   deleteCharacter: procedure
     .input(z.string().min(1, { message: "Character name is required" }))
@@ -187,7 +109,7 @@ export const characterRouter = router({
 
       await deleteImage(`characters/${input}`);
     }),
-  batchUpdateCharacters: procedure
+  batchFetchCharacters: procedure
     .input(
       z.object({
         shouldCheckForNewCharacters: z.boolean(),
@@ -293,12 +215,12 @@ export const characterRouter = router({
         name: "",
         link: "",
         isNew: false,
-        sets: [] as Set[],
+        sets: [],
         mainStats: {
-          Body: [] as string[],
-          Feet: [] as string[],
-          "Planar Sphere": [] as string[],
-          "Link Rope": [] as string[],
+          Body: [],
+          Feet: [],
+          "Planar Sphere": [],
+          "Link Rope": [],
         },
         substats: [] as string[][],
       };
@@ -321,7 +243,9 @@ export const characterRouter = router({
 
       for (
         let i = 0;
-        i < charactersToUpdate.length + newCharacterCards.length;
+        i <
+        charactersToUpdate.length +
+          (input.shouldCheckForNewCharacters ? newCharacterCards.length : 0);
         i++
       ) {
         const characterCard =
@@ -365,7 +289,14 @@ export const characterRouter = router({
 
         yield message.info(`${characterCard.name} HTML parsed successfully.`);
 
-        const infoBox = characterDoc.querySelector(".info-box p");
+        const infoBox = Array.from(
+          characterDoc.querySelectorAll(".content-header"),
+        )
+          .find(
+            (el) => el.innerText.trim().toLocaleLowerCase() === "best build",
+          )
+          ?.closest(".tab-inside")
+          ?.querySelector(".info-box p");
 
         if (
           infoBox &&
@@ -421,7 +352,7 @@ export const characterRouter = router({
         yield message.info("Forming final sets...");
 
         for (const set of [...accordianRelicSets, ...twoPieceMixedSets]) {
-          if (parsedCharacter.sets.find((s) => s.name === set)) {
+          if (parsedCharacter.sets.includes(set)) {
             yield message.info(`Found duplicate set "${set}". Skipping...`);
             continue;
           }
@@ -431,7 +362,7 @@ export const characterRouter = router({
               `The set "${set}" does not exist in database. Skipping...`,
             );
           } else {
-            parsedCharacter.sets.push(existingSet);
+            parsedCharacter.sets.push(existingSet.name);
             yield message.success(`Added "${set}" to final sets.`);
           }
         }
@@ -560,7 +491,7 @@ export const characterRouter = router({
           .filter((s) => !!s);
 
         yield message.info(
-          `Found ${substatTextSplitFirstLevel.length} different level(s) of priority (lower priority number = higher priority, i.e., more score).`,
+          `Found ${substatTextSplitFirstLevel.length} different level(s) of priority (lower priority number = higher priority).`,
         );
 
         // each stats should be something like "CRIT RATE = CRIT DMG" or "ATK%"
@@ -594,7 +525,7 @@ export const characterRouter = router({
               );
             }
 
-            substatInThisLevel.push(substat);
+            substatInThisLevel.push(foundSubstat.name);
           }
 
           parsedCharacter.substats.push(substatInThisLevel);

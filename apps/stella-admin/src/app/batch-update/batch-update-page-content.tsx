@@ -1,15 +1,14 @@
 "use client";
-import { Character } from "database";
 import CharacterToggleList from "./character-toggle-list";
 import { useState } from "react";
 import ScrapeData from "./scrape-data";
-import { ParsedPrydwenCharacter } from "@/lib/types";
+import { CharacterFull, ParsedPrydwenCharacter } from "@/lib/types";
 import VerifyUpdate from "./verify-update";
 
 export default function BatchUpdatePageContent({
   characters,
 }: {
-  characters: Character[];
+  characters: CharacterFull[];
 }) {
   const stages = [
     "Select Characters",
@@ -17,7 +16,7 @@ export default function BatchUpdatePageContent({
     "Verify Update",
     "Complete",
   ] as const;
-  const [stage, setStage] = useState<(typeof stages)[number]>("Verify Update");
+  const [stage, setStage] = useState<(typeof stages)[number]>(stages[2]);
   const [selectedCharacters, setSelectedCharacters] = useState(characters);
   const [parsedCharacters, setParsedCharacters] = useState<
     ParsedPrydwenCharacter[]
@@ -46,7 +45,9 @@ export default function BatchUpdatePageContent({
       )}
       {stage === "Verify Update" && (
         <VerifyUpdate
+          allCharacters={characters}
           parsedCharacters={parsedCharacters}
+          setParsedCharacters={setParsedCharacters}
           backToSelectCharactersStage={() => setStage("Select Characters")}
         />
       )}
