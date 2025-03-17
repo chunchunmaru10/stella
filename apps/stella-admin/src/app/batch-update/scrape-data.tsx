@@ -41,6 +41,9 @@ export default function ScrapeData({
     {
       enabled: batchEnabled,
       retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     },
   );
 
