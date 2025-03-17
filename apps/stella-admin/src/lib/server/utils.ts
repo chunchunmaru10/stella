@@ -177,7 +177,7 @@ export async function batchAddCharacters(
       );
     },
     {
-      timeout: 30000,
+      timeout: 100000,
     },
   );
 }
@@ -304,7 +304,7 @@ export async function batchUpdateCharacters(
       );
     },
     {
-      timeout: 30000,
+      timeout: 100000,
     },
   );
 }
