@@ -96,14 +96,28 @@ export default function CharacterCompareCard({
       status: Status;
     }[] = [];
 
+    function updatedSubstatsContains(stat: string) {
+      for (const level of updatedSubstats) {
+        for (const substat of level.substats) {
+          if (substat.name === stat) return true;
+        }
+      }
+
+      return false;
+    }
+
     // handle substats
     for (let i = 0; i < existingCharacter.substats.length; i++) {
       const priorityLevel = i + 1;
-      const newSubstats = existingCharacter.substats[i];
+      const newSubstats = existingCharacter.substats[i].filter(
+        (s) => !updatedSubstatsContains(s),
+      );
       const oldSubstats = existingCharacter.old.characterSubstats
         .filter((s) => s.priority === priorityLevel)
         .map((s) => s.statName);
       const unique = Array.from(new Set([...newSubstats, ...oldSubstats]));
+
+      if (!newSubstats.length) continue;
 
       updatedSubstats.push({
         priority: priorityLevel,
